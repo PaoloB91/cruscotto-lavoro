@@ -220,6 +220,7 @@ details.box .in{padding:0 16px 16px}
 .att .sbtn{justify-self:end}
 .attn{display:inline-block;font-size:12.5px;font-weight:500;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:3px;white-space:nowrap}
 .tag.tass{background:var(--sunk);color:var(--ink-2)}
+.tag.fc{background:var(--sunk);color:var(--ink-2);font-size:10.5px;padding:1px 6px;margin-right:2px;vertical-align:1px;text-transform:none;letter-spacing:0}
 .steps li.coll>span:first-child{color:var(--ink-2)}
 .who{font-weight:600}
 
@@ -652,8 +653,13 @@ function ultimoChiuso(mesi){ const cur = OGGI.slice(0,7); const i = mesi.lastInd
 function fmtKpi(k, v){ if(v==null) return "n.d."; const dec = k.metrica==="conversioni" && v%1 ? 1 : 0; return eur(v,dec)+(k.unita?" "+k.unita:""); }
 
 /* ================= BLOCCHI ================= */
-function rigaVar(v){
-  return `<div class="var"><div class="d">${dm(v.d)}</div><div class="c">${esc(v.c)}</div><div class="m">Motivo: ${esc(v.m)}</div>${v.link?`<div class="lk"><a href="${esc(v.link)}" target="_blank" rel="noopener">Dettagli</a></div>`:""}</div>`;
+/* Una riga può nominare più campagne unite da " + ": una modifica alla landing che le serve tutte.
+   Compare sotto ognuna, con le altre indicate in grigio. */
+const campiDi = r=>String(r.camp).split(" + ").map(s=>s.trim());
+function rigaVar(v, camp){
+  const altre = camp ? campiDi(v).filter(k=>k!==camp) : [];
+  const tag = altre.length ? `<span class="tag fc">anche ${esc(altre.join(", "))}</span> ` : "";
+  return `<div class="var"><div class="d">${dm(v.d)}</div><div class="c">${tag}${esc(v.c)}</div><div class="m">Motivo: ${esc(v.m)}</div>${v.link?`<div class="lk"><a href="${esc(v.link)}" target="_blank" rel="noopener">Dettagli</a></div>`:""}</div>`;
 }
 const dueHTML = s=>s?`<span class="due ${late(s)?"late":""}">${late(s)?"scaduta ":""}${dm(s)}</span>`:"";
 const giorni = dal=>{ const n = Math.round((new Date(OGGI+"T12:00:00")-new Date(dal+"T12:00:00"))/864e5); return n<=0?"da oggi":n===1?"1 giorno":n+" giorni"; };
@@ -989,16 +995,16 @@ function campagneHTML(c, per){
 function pannelloVariazioni(c){
   const v = c.variazioni||{stato:"in-arrivo"};
   if(v.stato!=="ok") return `<section class="box"><h2>Variazioni</h2>${inArrivo("Il registro di questo cliente non è ancora nel formato nuovo.")}</section>`;
-  const ordine = []; v.righe.forEach(r=>{ if(!ordine.includes(r.camp)) ordine.push(r.camp); });
-  return `<div class="chips" role="group" aria-label="Campagna">${ordine.map((k,i)=>`<button class="chip" data-camp="${esc(k)}" aria-pressed="${i===0}">${esc(k)}<span class="nn">${v.righe.filter(r=>r.camp===k).length}</span></button>`).join("")}</div>
+  const ordine = []; v.righe.forEach(r=>campiDi(r).forEach(k=>{ if(!ordine.includes(k)) ordine.push(k); }));
+  return `<div class="chips" role="group" aria-label="Campagna">${ordine.map((k,i)=>`<button class="chip" data-camp="${esc(k)}" aria-pressed="${i===0}">${esc(k)}<span class="nn">${v.righe.filter(r=>campiDi(r).includes(k)).length}</span></button>`).join("")}</div>
   <section class="box"><div id="var-body">${variazioniCampagna(v.righe, ordine[0])}</div></section>`;
 }
 function variazioniCampagna(righe, camp){
   let h = "", mese = "";
-  righe.filter(r=>r.camp===camp).forEach(r=>{
+  righe.filter(r=>campiDi(r).includes(camp)).forEach(r=>{
     const m = r.d.slice(0,7);
     if(m!==mese){ mese = m; h += `<div class="mese-h">${nomeMese(m)} ${m.slice(0,4)}</div>`; }
-    h += rigaVar(r);
+    h += rigaVar(r, camp);
   });
   return h || `<div class="ph">Nessuna variazione registrata.</div>`;
 }
@@ -1118,7 +1124,7 @@ function initCliente(c, tab){
   };
   const showPop = i=>{
     const rows = vars.filter(v=>v.d.slice(0,7)===mesi[i]), shown = rows.slice(0,4);
-    $("#pop").innerHTML = `<div class="pop"><h3>${nomeMese(mesi[i])}: ${rows.length} ${rows.length===1?"variazione":"variazioni"}</h3>${shown.map(rigaVar).join("")}${rows.length>4?`<a class="more" style="display:block;text-align:center;text-decoration:none;color:inherit" href="#c/${c.id}/variazioni">Le altre ${rows.length-4} in Variazioni</a>`:""}</div>`;
+    $("#pop").innerHTML = `<div class="pop"><h3>${nomeMese(mesi[i])}: ${rows.length} ${rows.length===1?"variazione":"variazioni"}</h3>${shown.map(r=>rigaVar(r)).join("")}${rows.length>4?`<a class="more" style="display:block;text-align:center;text-decoration:none;color:inherit" href="#c/${c.id}/variazioni">Le altre ${rows.length-4} in Variazioni</a>`:""}</div>`;
   };
   draw();
   /* Ridisegna se la larghezza cambia dopo il primo disegno (font, barra di scorrimento, telefono ruotato). */
