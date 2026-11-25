@@ -773,6 +773,7 @@ const chiaveGhHTML = ()=>`<form class="kp-key" data-kp-chiave>
 </form>`;
 function kpHTML(st){
   const punti = st.punti||[], scrive = !CIFRATO || !!leggiGh();
+  if(st.nonLetti && !punti.length) return `<div class="ph">Punti non letti: GitHub non risponde. Ricarica fra un minuto.</div>` + (scrive ? "" : `<button class="kp-link" data-kp-collega>Scrivere da questo dispositivo</button>`);
   let h = punti.length
     ? `<ul class="kps">${punti.map(p=>`<li><span>${esc(p.t)}</span>${scrive?`<button class="x" data-kp-via="${esc(p.k)}" aria-label="Togli questo punto">&times;</button>`:"<span></span>"}</li>`).join("")}</ul>`
     : `<div class="ph">Nessun punto${scrive?": scrivi qui sotto le cose da avere sott'occhio.":"."}</div>`;
@@ -793,8 +794,12 @@ async function initKeyPoints(c){
     else if(err instanceof ErroreChiave){ route(); }
     else toast(String(err.message||err));
   };
-  try{ st = await leggiAppunti(c.id); mostra(); }
-  catch(err){ if(err instanceof ErroreGh){ salvaGh(""); st = await leggiAppunti(c.id).catch(()=>st); mostra(); } else body.innerHTML = `<div class="ph">${esc(err.message||err)}</div>`; }
+  /* Un errore momentaneo dell'archivio (es. 503 mentre GitHub ripubblica) non deve nascondere il riquadro:
+     si ritenta una volta, poi si mostra comunque. La scrittura rilegge sempre dall'API, quindi non perde punti. */
+  const prova = async ()=>{ try{ return await leggiAppunti(c.id); } catch(err){ if(err instanceof ErroreGh){ salvaGh(""); return leggiAppunti(c.id); } throw err; } };
+  try{ st = await prova(); }
+  catch(err){ await new Promise(r=>setTimeout(r,2000)); st = await prova().catch(()=>({punti:[], nonLetti:true})); }
+  mostra();
   root.addEventListener("submit", async e=>{
     const f = e.target.closest("form"); if(!f || !body.contains(f)) return;
     e.preventDefault();
