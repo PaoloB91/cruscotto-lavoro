@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cruscotto">
+<meta name="theme-color" content="#ffffff">
+<title>Cruscotto PS Company</title>
+<link rel="icon" href="icona.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icona-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: una colonna stretta pensata per il telefono, caselle impilate; sul Mac la stessa colonna più larga. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --sunk:#eef1f4; --line:#dfe4ea;
+  --ink:#121820; --ink-2:#4a5562; --ink-3:#7a8592;
+  --accent:#2a78d6; --accent-soft:#e3eefb; --mark:#eb6834;
+  --good:#0a7d0a; --bad:#c23131; --warn-bg:#fdf0d6; --warn-ink:#7a5200;
+  --bad-bg:#fbe5e5; --good-bg:#e2f3e2;
+  --banner-bg:#121820; --banner-ink:#f4f6f8;
+  --f-text:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111417; --surface:#191d21; --sunk:#14181b; --line:#2b3238;
+  --ink:#eef1f4; --ink-2:#b2bcc6; --ink-3:#86919c;
+  --accent:#4f95ea; --accent-soft:#1c2b3d; --mark:#e9733f;
+  --good:#3fbf3f; --bad:#ef6b6b; --warn-bg:#3a2e12; --warn-ink:#f2c65a;
+  --bad-bg:#3b1f1f; --good-bg:#16301a;
+  --banner-bg:#eef1f4; --banner-ink:#111417;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111417; --surface:#191d21; --sunk:#14181b; --line:#2b3238;
+  --ink:#eef1f4; --ink-2:#b2bcc6; --ink-3:#86919c;
+  --accent:#4f95ea; --accent-soft:#1c2b3d; --mark:#e9733f;
+  --good:#3fbf3f; --bad:#ef6b6b; --warn-bg:#3a2e12; --warn-ink:#f2c65a;
+  --bad-bg:#3b1f1f; --good-bg:#16301a;
+  --banner-bg:#eef1f4; --banner-ink:#111417;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-text);font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
+@media (min-width:800px){body{font-size:16px}}
+button{font:inherit;color:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.num{font-variant-numeric:tabular-nums}
+
+.banner{background:var(--banner-bg);color:var(--banner-ink);font-size:13px;letter-spacing:.02em;text-align:center;padding-block:5px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:820px;margin:0 auto;padding-block:10px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.brand b{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.brand span{font-size:14px;color:var(--ink-3)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-top:6px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;text-decoration:none;color:var(--ink-2);font-size:15px;font-weight:500;padding:8px 10px 10px;border-bottom:2px solid transparent}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+@media (max-width:640px){nav.tabs{gap:0;justify-content:space-between}nav.tabs a{font-size:14px;padding:8px 5px 10px}}
+/* Telefono: sei voci nella barra, quelle di due parole vanno a capo */
+@media (max-width:480px){nav.tabs{gap:7px}nav.tabs a{font-size:13px;padding:7px 0 9px;flex:0 1 auto;min-width:0;white-space:normal;text-align:center;line-height:1.15;display:flex;align-items:center;justify-content:center}}
+
+main{max-width:820px;margin:0 auto;padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{display:flex;flex-direction:column;gap:16px}
+h1{font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.sub{color:var(--ink-3);font-size:15px;margin-top:2px}
+.back{font-size:15px;text-decoration:none;color:var(--ink-2);display:inline-flex;align-items:center;gap:4px;padding-block:4px}
+
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.box h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:600;margin:0 0 12px}
+.fonte{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);line-height:1.5}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--warn-bg);color:var(--warn-ink);vertical-align:middle}
+
+/* Clienti */
+.clients{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.client{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:14px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.clients li:first-child .client{border-top:0}
+.client .name{font-weight:600;font-size:19px}
+.client .meta{font-size:14px;color:var(--ink-3)}
+.client .val{font-size:26px;font-weight:600;text-align:right;line-height:1.1}
+.client .trend{font-size:14px;text-align:right;display:flex;gap:4px;align-items:center;justify-content:flex-end}
+.client .spark{grid-column:1/-1}
+.client.off{opacity:.55;grid-template-columns:1fr auto;padding:12px 0}
+.client.off .name{font-size:17px;font-weight:500}
+.soon{font-size:13px;color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:1px 7px}
+.up{color:var(--good)} .down-good{color:var(--good)} .dn{color:var(--bad)}
+
+/* KPI riga */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kpi{background:var(--sunk);border-radius:8px;padding:10px 12px;min-width:0}
+.kpi .l{font-size:13px;color:var(--ink-2);line-height:1.25}
+.kpi .v{font-size:24px;font-weight:600;margin-top:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.readout{font-size:15px;color:var(--ink-2);min-height:22px;margin-bottom:4px}
+.readout b{color:var(--ink);font-weight:600}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart text{font-family:var(--f-text)}
+.legend-mark{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-3);margin-top:6px}
+.legend-mark i{width:16px;height:16px;border-radius:50%;background:var(--mark);display:inline-block;color:#fff;font-style:normal;font-size:10px;line-height:16px;text-align:center;font-weight:700}
+.pop{margin-top:10px;background:var(--sunk);border-radius:8px;padding:10px 12px}
+.pop h3{font-size:14px;margin:0 0 6px;font-weight:600}
+
+/* Variazioni */
+.camp{margin-top:14px}
+.camp:first-of-type{margin-top:0}
+.camp-h{font-size:15px;font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.camp-h span{font-weight:400;color:var(--ink-3);font-size:13px}
+.var{display:grid;grid-template-columns:52px minmax(0,1fr);gap:2px 10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.var:last-child{border-bottom:0}
+.var .d{font-family:var(--f-mono);font-size:13px;color:var(--ink-3);padding-top:2px}
+.var .c{font-size:15.5px}
+.var .m{grid-column:2;font-size:14px;color:var(--ink-2)}
+.more{margin-top:10px;background:none;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer;width:100%}
+
+/* Prossimi passi */
+.steps{list-style:none;margin:0;padding:0}
+.steps li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.steps li:last-child{border-bottom:0}
+.due{flex:none;font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3)}
+.due.late{color:var(--bad)}
+
+/* Caselle chiuse */
+details.box{padding:0}
+details.box>summary{list-style:none;cursor:pointer;padding:16px;display:flex;justify-content:space-between;align-items:center}
+details.box>summary::-webkit-details-marker{display:none}
+details.box>summary h2{margin:0}
+details.box>summary::after{content:"+";font-size:20px;color:var(--ink-3);line-height:1}
+details.box[open]>summary::after{content:"\2212"}
+details.box .in{padding:0 16px 16px}
+.sk{margin-top:12px}
+.sk:first-child{margin-top:0}
+.sk h3{font-size:15px;margin:0 0 4px;font-weight:600}
+.sk ul{margin:0;padding-left:18px;font-size:15px}
+.ph{font-size:14.5px;color:var(--ink-3);border:1px dashed var(--line);border-radius:8px;padding:10px 12px}
+
+/* Campagne Naruto */
+.camps{list-style:none;margin:0;padding:0}
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:11px 8px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:6px;width:100%;text-align:left;background:none;border-left:0;border-right:0;border-top:0}
+.cmp[aria-pressed="true"]{background:var(--accent-soft)}
+.cmp .n{font-weight:600;font-size:15.5px}
+.cmp .o{font-size:13.5px;color:var(--ink-2)}
+.cmp .cpr{font-size:20px;font-weight:600;text-align:right}
+.cmp .x{font-size:13px;color:var(--ink-3);text-align:right}
+.cmp.closed .n,.cmp.closed .cpr{color:var(--ink-3)}
+
+/* Prima e dopo */
+.before{font-size:14.5px;color:var(--ink-2);background:var(--sunk);border-radius:8px;padding:12px;line-height:1.5}
+.count{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3);margin:6px 0 0}
+.after{font-size:16px;border-left:3px solid var(--accent);padding:4px 0 4px 12px}
+.after .d{font-family:var(--f-mono);font-size:13px;color:var(--ink-3)}
+.propose{border:1px solid var(--accent);background:var(--accent-soft)}
+.propose h2{color:var(--accent)}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{border-radius:8px;padding:10px 18px;font-size:15px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--surface)}
+.btn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.field{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.field label{font-size:13px;color:var(--ink-2);display:flex;justify-content:space-between}
+.field input{font:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%;min-width:0}
+.ok{margin-top:10px;font-size:14.5px;color:var(--good);font-weight:600}
+
+/* Foglio A4 */
+.sheet-wrap{background:var(--sunk);border-radius:10px;padding:12px}
+.sheet{container-type:inline-size;width:100%;max-width:620px;margin:0 auto;aspect-ratio:210/297;background:#fff;color:#111;box-shadow:0 1px 3px rgba(0,0,0,.18);font-family:var(--f-text);overflow:hidden}
+.sheet-in{padding:6cqw 6.5cqw;display:flex;flex-direction:column;gap:2.4cqw;height:100%}
+.sh-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:.35cqw solid #111;padding-bottom:1.4cqw}
+.sh-head b{font-size:4.2cqw;font-weight:700}
+.sh-head span{font-size:2.3cqw;color:#555}
+.sh-cols{display:grid;grid-template-columns:1fr 1fr;gap:2.4cqw 4cqw;align-content:start}
+.sh-blk h4{margin:0 0 .8cqw;font-size:2.35cqw;text-transform:uppercase;letter-spacing:.06em;color:#111;border-bottom:.15cqw solid #bbb;padding-bottom:.5cqw;display:flex;justify-content:space-between}
+.sh-blk h4 span{font-weight:400;color:#777;text-transform:none;letter-spacing:0}
+.sh-blk ul{list-style:none;margin:0;padding:0}
+.sh-blk li{font-size:2.15cqw;line-height:1.35;display:grid;grid-template-columns:2.4cqw 1fr auto;gap:0 1cqw;padding:.45cqw 0}
+.sh-blk li::before{content:"";width:1.7cqw;height:1.7cqw;border:.2cqw solid #333;border-radius:.3cqw;margin-top:.25cqw}
+.sh-blk li em{font-style:normal;font-family:var(--f-mono);font-size:1.8cqw;color:#666;white-space:nowrap}
+.sh-blk li em.late{color:#b01e1e;font-weight:600}
+.sh-pers{margin-top:auto;border-top:.35cqw dashed #999;padding-top:2cqw}
+.sh-foot{font-size:1.7cqw;color:#888;display:flex;justify-content:space-between}
+
+/* Posta e Automazioni */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat .v{font-size:26px;font-weight:600;line-height:1.1}
+.stat .l{font-size:13px;color:var(--ink-2)}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rows li:last-child{border-bottom:0}
+.rows .t{font-size:15.5px}
+.rows .s{font-size:13.5px;color:var(--ink-3)}
+.pill{font-size:12.5px;font-weight:600;padding:2px 8px;border-radius:999px;align-self:start;white-space:nowrap}
+.p-ok{background:var(--good-bg);color:var(--good)}
+.p-err{background:var(--bad-bg);color:var(--bad)}
+.p-wait{background:var(--sunk);color:var(--ink-2)}
+.p-warn{background:var(--warn-bg);color:var(--warn-ink)}
+.sec-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+/* Pulsanti piccoli, toast */
+.sbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14.5px;font-weight:500;cursor:pointer;line-height:1.2}
+.sbtn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.sbtn.dng{color:var(--bad)}
+.sbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--banner-bg);color:var(--banner-ink);padding:10px 16px;border-radius:10px;font-size:15px;z-index:20;width:max-content;max-width:calc(100% - 32px);box-shadow:0 4px 14px rgba(0,0,0,.22)}
+
+/* In attesa */
+.att{list-style:none;margin:0;padding:0}
+.att li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:center}
+.att li:last-child{border-bottom:0}
+.att .gg{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3);text-align:right;white-space:nowrap;align-self:baseline}
+.att .wh{font-size:14px;color:var(--ink-2);min-width:0}
+.att .wh b{font-weight:600;color:var(--ink)}
+.att .sbtn{justify-self:end}
+.attn{display:inline-block;font-size:12.5px;font-weight:500;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:3px;white-space:nowrap}
+.tag.tass{background:var(--sunk);color:var(--ink-2)}
+.steps li.coll>span:first-child{color:var(--ink-2)}
+.who{font-weight:600}
+
+/* Oggi: elenco */
+.cli-blk{margin-top:16px}
+.cli-blk:first-child{margin-top:0}
+.cli-h{font-size:15px;font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.cli-h span{font-weight:400;color:var(--ink-3);font-size:13px;text-align:right}
+.vos{list-style:none;margin:0;padding:0}
+.vo{border-bottom:1px solid var(--line)}
+.vo:last-child{border-bottom:0}
+.vo-row{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%;padding:10px 0;cursor:pointer;font-size:16px}
+.vo-row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.vo-row .tx{flex:1;min-width:0}
+.vo.open{background:var(--sunk);border-radius:8px;margin-inline:-8px;padding-inline:8px;border-bottom-color:transparent}
+.vo-act{display:flex;flex-direction:column;gap:10px;padding-bottom:12px}
+.acts,.pass{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pass>span{font-size:14px;color:var(--ink-2);margin-right:2px}
+.mini-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mini-form label{font-size:13.5px;color:var(--ink-2);width:100%}
+.mini-form input{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);flex:1 1 180px;min-width:0}
+.lab{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:600;margin:8px 0 -6px}
+.sh-att{margin-top:auto;border-top:.35cqw dashed #999;padding-top:1.6cqw;font-size:2.15cqw;display:flex;flex-wrap:wrap;gap:.6cqw 3cqw;align-items:baseline}
+.sh-att .k{font-size:2.15cqw;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.sh-att b{font-weight:700}
+
+/* Come funziona: disegno */
+.dg-fig{margin:0;scroll-margin-top:110px}
+.dg-wrap{max-width:500px;margin:0 auto}
+.dg{display:block;width:100%;height:auto;font-family:var(--f-text)}
+.dg g{transition:opacity .25s}
+.dg .n rect{fill:var(--surface);stroke:var(--ink-3);stroke-width:1}
+.dg .n .nl{fill:var(--ink);font-size:13px;font-weight:600}
+.dg .n.c .nl{font-size:12.5px;font-weight:500}
+.dg .n .ns{fill:var(--ink-3);font-size:11px}
+.dg .n.dash rect{fill:none;stroke-dasharray:5 3}
+.dg .ar line{stroke:var(--ink-3);stroke-width:1.3}
+.dg .ar polygon{fill:var(--ink-3)}
+.dg .ar text{fill:var(--ink-3);font-size:11px}
+.dg .fr{fill:none;stroke:var(--ink-2);stroke-width:1.5}
+.dg .lg-bg{fill:var(--surface)}
+.dg .lg{fill:var(--ink);font-size:11.5px;font-weight:700;letter-spacing:.08em}
+.dg .sch{fill:var(--sunk)}
+.dg .sch-l{fill:var(--ink-3);font-size:11px;font-weight:600}
+.dg .pers rect{fill:none;stroke:var(--ink-3);stroke-dasharray:2 3}
+.dg .pers .pl{fill:var(--ink-2);font-size:12.5px;font-weight:600}
+.dg .pers .ps{fill:var(--ink-3);font-size:11px}
+.dg.play .n:not(.on),.dg.play .ar:not(.on),.dg.play .bg{opacity:.22}
+.dg .n.on rect{stroke:var(--accent);fill:var(--accent-soft);stroke-width:1.5}
+.dg .n.now rect{stroke-width:2.6}
+.dg .ar.on line{stroke:var(--accent);stroke-width:2.2}
+.dg .ar.on polygon{fill:var(--accent)}
+.dg .ar.on text{fill:var(--accent);font-weight:600}
+.step{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"nb nav" "tx tx";gap:4px 10px;align-items:center;margin-top:12px;padding:10px 12px;background:var(--sunk);border-radius:8px;min-height:70px}
+.step .nb{grid-area:nb;font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.step .nav{grid-area:nav;display:flex;gap:4px}
+.step .nav button{width:34px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--surface);cursor:pointer;font-size:18px;line-height:1}
+.step .nav button:disabled{opacity:.35;cursor:default}
+.step .tx{grid-area:tx;font-size:16.5px;font-weight:500}
+.step .tx.idle{color:var(--ink-3);font-weight:400}
+.cap{font-size:13px;color:var(--ink-3);margin-top:8px;text-align:center}
+.casi{display:flex;flex-direction:column;gap:8px}
+@media (min-width:700px){.casi{display:grid;grid-template-columns:1fr 1fr}}
+.caso{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;font-size:16px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.caso::after{content:"\203A";font-size:20px;color:var(--ink-3);line-height:1}
+.caso[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.uso,.via{list-style:none;margin:0;padding:0}
+.uso li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:16px}
+.uso li:last-child,.via li:last-child{border-bottom:0}
+.uso b{font-weight:600}
+.nota{font-size:14.5px;color:var(--ink-2);margin:12px 0 0;display:flex;flex-direction:column;gap:4px}
+.via li{display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1.15fr);gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15.5px;align-items:baseline}
+.via .old{color:var(--ink-3);text-decoration:line-through}
+.via .ar{color:var(--ink-3);text-align:center}
+.sub-h{font-size:13px;font-weight:600;color:var(--ink-2);margin:16px 0 4px}
+
+@media (prefers-reduced-motion:no-preference){.view{animation:fade .18s ease-out}}
+@keyframes fade{from{opacity:.4}to{opacity:1}}
+</style>
+<style>
+/* Pagina vera: aggiunte allo stile del prototipo. */
+body{margin:0}
+/* Il foglio cresce con le voci: almeno una pagina A4, poi si allunga. */
+.sheet{overflow:visible;aspect-ratio:auto}
+.sheet-in{height:auto;min-height:calc(100cqw * 297 / 210)}
+.top-in .brand span.agg{font-size:13px}
+.ph.soon-box{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.var .lk{grid-column:2;font-size:13px}
+.var .lk a{color:var(--ink-3)}
+.steps li .tx{min-width:0}
+.tag.dc{background:var(--accent-soft);color:var(--accent)}
+.key{max-width:460px;margin:8vh auto 0;display:flex;flex-direction:column;gap:12px}
+.key p{margin:0;color:var(--ink-2);font-size:15.5px}
+.key ol{margin:0;padding-left:20px;color:var(--ink-2);font-size:15px;display:flex;flex-direction:column;gap:4px}
+.key .err{color:var(--bad);font-size:14.5px;font-weight:600}
+.key .ricorda{display:flex;align-items:center;gap:8px;font-size:14.5px;color:var(--ink-2);width:100%;margin-top:4px}
+.key .ricorda input{width:18px;height:18px;flex:none;margin:0}
+.btn-print{align-self:flex-start}
+.stato-dati{font-size:13px;color:var(--ink-3)}
+@media print{
+  @page{size:A4;margin:12mm}
+  body.stampa-oggi{background:#fff}
+  body.stampa-oggi header.top,body.stampa-oggi .toast,body.stampa-oggi .view>*:not(.sheet-wrap){display:none!important}
+  body.stampa-oggi main{padding:0;max-width:none}
+  body.stampa-oggi .sheet-wrap{background:none;padding:0;border-radius:0}
+  body.stampa-oggi .sheet{box-shadow:none;max-width:none;aspect-ratio:auto}
+  body.stampa-oggi .sheet-in{padding:0}
+  body.stampa-oggi .sh-blk{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><b>Cruscotto</b><span id="data-oggi"></span></div>
+    <nav class="tabs" aria-label="Sezioni">
+      <a href="#clienti" data-tab="clienti">Clienti</a>
+      <a href="#oggi" data-tab="oggi">Oggi</a>
+      <a href="#posta" data-tab="posta">Posta</a>
+      <a href="#automazioni" data-tab="automazioni">Automazioni</a>
+      <a href="#come-funziona" data-tab="come-funziona">Come funziona</a>
+    </nav>
+  </div>
+</header>
+<main id="app"></main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* Cruscotto di lavoro. Pagina pubblica senza dati: i dati stanno cifrati nell'archivio
+   PaoloB91/cruscotto-lavoro-dati (GitHub Pages, stesso dominio). La password apre chiave.json,
+   che contiene la chiave dati; la chiave si ricorda sul dispositivo se Paolo lo chiede.
+   In locale, se dati/ non ha chiave.json, i dati si leggono in chiaro (anteprima).
+   Sorgente: Sistema/cruscotto/lavoro/ del workspace. Regole: Sistema/cruscotto/CLAUDE.md. */
+const LOCALE = location.protocol === "file:" || ["localhost","127.0.0.1"].includes(location.hostname);
+const BASE = LOCALE ? "dati/" : "/cruscotto-lavoro-dati/";
+const CHIAVE_LS = "cruscotto-lavoro-k";
+const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+const MESI_LUNGHI = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+const GIORNI = ["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];
+
+/* ================= DATI ================= */
+const D = {indice:null, clienti:{}, risultati:{}};
+let OGGI = new Date().toISOString().slice(0,10);
+
+/* La chiave dati si tiene in localStorage ("ricorda su questo dispositivo") o solo per la sessione. */
+function leggiChiave(){
+  try{ return localStorage.getItem(CHIAVE_LS) || sessionStorage.getItem(CHIAVE_LS) || ""; }catch(e){ return ""; }
+}
+function salvaChiave(v, ricorda){
+  try{ localStorage.removeItem(CHIAVE_LS); sessionStorage.removeItem(CHIAVE_LS); }catch(e){}
+  if(!v) return;
+  try{ (ricorda ? localStorage : sessionStorage).setItem(CHIAVE_LS, v); }catch(e){ try{ sessionStorage.setItem(CHIAVE_LS, v); }catch(e2){} }
+}
+const b64d = s=>Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+const b64e = u=>btoa(String.fromCharCode(...new Uint8Array(u)));
+const url = rel=>BASE + rel + "?t=" + Date.now();
+
+class ErroreChiave extends Error {}
+let CIFRATO = null, CHIAVE_JSON = null, CHIAVE = null;
+async function modo(){
+  if(CIFRATO!==null) return;
+  const r = await fetch(url("chiave.json"), {cache:"no-store"});
+  if(r.ok){ CHIAVE_JSON = await r.json(); CIFRATO = true; }
+  else if(r.status===404 && LOCALE) CIFRATO = false;
+  else throw new Error(r.status===404 ? "archivio dati non ancora pubblicato" : "archivio dati: risposta "+r.status);
+}
+async function chiaveDati(){
+  if(CHIAVE) return CHIAVE;
+  const k = leggiChiave();
+  if(!k) throw new ErroreChiave("manca");
+  CHIAVE = await crypto.subtle.importKey("raw", b64d(k), "AES-GCM", false, ["decrypt"]);
+  return CHIAVE;
+}
+/* Password → chiave dati, con gli stessi parametri di strumenti/cifratura.py (PBKDF2-SHA256, AES-GCM). */
+async function apriConPassword(pw){
+  await modo();
+  const j = CHIAVE_JSON;
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  const kek = await crypto.subtle.deriveKey({name:"PBKDF2", salt:b64d(j.sale), iterations:j.iter, hash:"SHA-256"},
+    base, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+  const k = await crypto.subtle.decrypt({name:"AES-GCM", iv:b64d(j.iv)}, kek, b64d(j.k));
+  return b64e(k);
+}
+async function leggi(rel, tipo="json"){
+  await modo();
+  let testo;
+  if(!CIFRATO){
+    const r = await fetch(url(rel), {cache:"no-store"});
+    if(r.status===404) return null;
+    if(!r.ok) throw new Error("archivio dati: risposta "+r.status);
+    testo = await r.text();
+  } else {
+    const k = await chiaveDati();
+    const r = await fetch(url(rel+".cif"), {cache:"no-store"});
+    if(r.status===404) return null;
+    if(!r.ok) throw new Error("archivio dati: risposta "+r.status);
+    const b = new Uint8Array(await r.arrayBuffer());
+    try{ testo = new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:b.slice(0,12)}, k, b.slice(12))); }
+    catch(e){ salvaChiave(""); CHIAVE = null; throw new ErroreChiave("cambiata"); }
+  }
+  return tipo==="json" ? JSON.parse(testo) : testo;
+}
+
+async function caricaCliente(id){
+  if(D.clienti[id]) return D.clienti[id];
+  const c = await leggi(`clienti/${id}.json`);
+  D.clienti[id] = c;
+  if(c && c.risultati && !D.risultati[id]){
+    const t = await leggi(c.risultati, "text");
+    D.risultati[id] = t ? parseCSV(t) : [];
+  }
+  return c;
+}
+
+function parseCSV(t){
+  const righe = t.trim().split(/\r?\n/).slice(1);
+  return righe.map(r=>{
+    const p = r.split(","); /* i nomi delle campagne non hanno virgole: sono quelli della piattaforma senza barre */
+    const v = p.pop(), m = p.pop(), g = p.shift();
+    return {g, c:p.join(","), m, v:+v};
+  });
+}
+
+/* Totali mese per mese di una metrica, dal primo mese con dati al mese di oggi. */
+function perMese(righe, metrica){
+  const tot = {};
+  righe.forEach(r=>{ if(r.m===metrica){ const k=r.g.slice(0,7); tot[k]=(tot[k]||0)+r.v; } });
+  return tot;
+}
+function mesiDa(righe){
+  if(!righe.length) return [];
+  const primo = righe.reduce((a,r)=>r.g<a?r.g:a, righe[0].g).slice(0,7);
+  const out = []; let [y,m] = primo.split("-").map(Number);
+  const fine = OGGI.slice(0,7);
+  while(true){ const k = `${y}-${String(m).padStart(2,"0")}`; out.push(k); if(k>=fine) break; m++; if(m>12){m=1;y++;} }
+  return out;
+}
+const ultimoGiorno = righe=>righe.reduce((a,r)=>r.g>a?r.g:a, "");
+
+/* ================= UTILITÀ ================= */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dm = iso=>iso.slice(8,10)+"/"+iso.slice(5,7);
+const eur = (v,dec=0)=>v.toLocaleString("it-IT",{minimumFractionDigits:dec,maximumFractionDigits:dec});
+const css = n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const late = s=>s && s<OGGI;
+const fonte = t=>`<div class="fonte">Fonte: ${t}</div>`;
+const inArrivo = t=>`<div class="ph soon-box"><span>${t}</span><span class="soon">in arrivo</span></div>`;
+const nomeMese = k=>MESI_LUNGHI[+k.slice(5,7)-1];
+function dataLunga(iso){ const d=new Date(iso+"T12:00:00"); return `${GIORNI[d.getDay()]} ${d.getDate()} ${MESI_LUNGHI[d.getMonth()].toLowerCase()}`; }
+
+const FONTI = {
+  risultati:c=>`risultati/${c}.csv nell'archivio dati. Scrivono solo le automazioni, dalle piattaforme.`,
+  variazioni:"sezione B del tracker dell'attività, solo cose fatte. Scrivono le skill, dopo la tua approvazione della riga.",
+  passi:"archivio dei to-do, campo cliente. Arrivano da Telegram, riunioni riviste, tua richiesta.",
+  attesa:"archivio dei to-do, stato in attesa, con chi o cosa le sblocca.",
+  scheda:c=>`Clienti/${c}/scheda.yaml. Scrive Claude, solo su tua dettatura o approvazione.`,
+  spunti:c=>`Clienti/${c}/scheda.yaml. Solo tua dettatura, in sessione o da Telegram.`
+};
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{t.hidden=true;},2600); }
+
+/* ================= GRAFICI ================= */
+function scala(max){
+  if(max<=0) return {max:1,ticks:[0,1]};
+  const p = Math.pow(10, Math.floor(Math.log10(max))), passi=[1,2,2.5,5,10];
+  let st = p; for(const s of passi){ if(max/(s*p)<=3){ st=s*p; break; } }
+  const top = Math.ceil(max/st)*st, ticks=[]; for(let t=0;t<=top+1e-9;t+=st) ticks.push(+t.toFixed(6));
+  return {max:top*1.08, ticks};
+}
+function barChart(el, vals, labels, opts){
+  const W = Math.max(280, el.clientWidth), H = 210;
+  const padL = 38, padR = 6, padT = 34, padB = 26;
+  const iw = W-padL-padR, ih = H-padT-padB;
+  const {max, ticks} = opts;
+  const n = vals.length, slot = iw/n, bw = Math.min(30, slot*0.58);
+  const y = v=>padT+ih-(v/max)*ih;
+  const ink3 = css("--ink-3"), line = css("--line"), acc = css("--accent"), mark = css("--mark"), ink = css("--ink");
+  let s = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="${esc(opts.aria)}">`;
+  ticks.forEach(t=>{ s+=`<line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="${line}" stroke-width="1"/>`;
+    s+=`<text x="${padL-6}" y="${y(t)+4}" text-anchor="end" font-size="11" fill="${ink3}">${eur(t, t%1?1:0)}</text>`; });
+  vals.forEach((v,i)=>{
+    const cx = padL+slot*i+slot/2, sel = i===opts.sel, parz = i===n-1 && opts.parziale;
+    if(v!=null){
+      const top = y(v), h = padT+ih-top, r = Math.min(4,h);
+      s+=`<path d="M${cx-bw/2},${padT+ih} V${top+r} Q${cx-bw/2},${top} ${cx-bw/2+r},${top} H${cx+bw/2-r} Q${cx+bw/2},${top} ${cx+bw/2},${top+r} V${padT+ih} Z" fill="${acc}" opacity="${parz?(sel?0.6:0.38):(sel?1:0.78)}"/>`;
+    } else {
+      s+=`<text x="${cx}" y="${padT+ih-6}" text-anchor="middle" font-size="10" fill="${ink3}">n.d.</text>`;
+    }
+    s+=`<text x="${cx}" y="${H-8}" text-anchor="middle" font-size="11.5" fill="${sel?ink:ink3}" font-weight="${sel?600:400}">${labels[i]}</text>`;
+    s+=`<rect x="${padL+slot*i}" y="${padT}" width="${slot}" height="${ih+padB}" fill="transparent" data-bar="${i}" style="cursor:pointer"/>`;
+    const mk = opts.marks[i];
+    if(mk){
+      const on = opts.openMark===i;
+      s+=`<g data-mark="${i}" style="cursor:pointer"><line x1="${cx}" x2="${cx}" y1="22" y2="${padT+ih}" stroke="${mark}" stroke-width="1" stroke-dasharray="2 3" opacity=".7"/>
+        <circle cx="${cx}" cy="12" r="${on?11:10}" fill="${mark}" stroke="${css('--surface')}" stroke-width="2"/>
+        <text x="${cx}" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">${mk}</text>
+        <rect x="${cx-18}" y="-6" width="36" height="36" fill="transparent"/></g>`;
+    }
+  });
+  s+=`</svg>`;
+  el.innerHTML = s;
+}
+function spark(el, vals){
+  const v = vals.filter(x=>x!=null); if(v.length<2){ el.innerHTML=""; return; }
+  const W = el.clientWidth||300, H = 30, n=v.length, max=Math.max(...v), min=Math.min(...v);
+  const x=i=>2+i*(W-6)/(n-1), y=t=>H-3-(t-min)/((max-min)||1)*(H-8);
+  const p = v.map((t,i)=>`${i?"L":"M"}${x(i)},${y(t)}`).join(" ");
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" width="100%" aria-hidden="true"><path d="${p}" fill="none" stroke="${css("--accent")}" stroke-width="1.6" stroke-linejoin="round"/><circle cx="${x(n-1)}" cy="${y(v[n-1])}" r="3" fill="${css("--accent")}"/></svg>`;
+}
+function arrow(dir){
+  return dir==="up"
+    ? `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 L11 8 H1 Z" fill="currentColor"/></svg>`
+    : `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 11 L11 4 H1 Z" fill="currentColor"/></svg>`;
+}
+
+/* Serie mensile di un KPI: null prima della data da cui il KPI è affidabile. */
+function serieKpi(id, k){
+  const righe = D.risultati[id]||[], mesi = mesiDa(righe), tot = perMese(righe, k.metrica);
+  const dal = k.dal ? k.dal.slice(0,7) : null;
+  const vals = mesi.map(m=> dal && m<dal ? null : (tot[m]||0));
+  return {mesi, vals};
+}
+/* Ultimo mese chiuso e quello prima, per l'elenco clienti e le caselle in alto. */
+function ultimoChiuso(mesi){ const cur = OGGI.slice(0,7); const i = mesi.lastIndexOf(cur); return i>0 ? i-1 : mesi.length-1; }
+function fmtKpi(k, v){ if(v==null) return "n.d."; const dec = k.metrica==="conversioni" && v%1 ? 1 : 0; return eur(v,dec)+(k.unita?" "+k.unita:""); }
+
+/* ================= BLOCCHI ================= */
+function rigaVar(v){
+  return `<div class="var"><div class="d">${dm(v.d)}</div><div class="c">${esc(v.c)}</div><div class="m">Motivo: ${esc(v.m)}</div>${v.link?`<div class="lk"><a href="${esc(v.link)}" target="_blank" rel="noopener">Dettagli</a></div>`:""}</div>`;
+}
+function variazioniHTML(list, all){
+  const visible = new Set(list.slice(0,5)), order = [];
+  list.forEach(v=>{ if(!order.includes(v.camp)) order.push(v.camp); });
+  let h = "";
+  order.forEach(camp=>{
+    const rows = list.filter(v=>v.camp===camp && (all||visible.has(v)));
+    if(!rows.length) return;
+    const tot = list.filter(v=>v.camp===camp).length;
+    h+=`<div class="camp"><div class="camp-h">${esc(camp)}<span>${tot} ${tot===1?"riga":"righe"}</span></div>${rows.map(rigaVar).join("")}</div>`;
+  });
+  if(list.length>5) h+=`<button class="more" data-toggle-var>${all?"Mostra solo le ultime 5":"Mostra tutte ("+list.length+")"}</button>`;
+  return h || `<div class="ph">Nessuna variazione registrata.</div>`;
+}
+const dueHTML = s=>s?`<span class="due ${late(s)?"late":""}">${late(s)?"scaduta ":""}${dm(s)}</span>`:"";
+function passiHTML(list){
+  if(!list.length) return `<div class="ph">Nessun prossimo passo.</div>`;
+  return `<ul class="steps">${list.map(p=>`<li><span class="tx">${esc(p.t)}${p.dc?' <span class="tag dc">da confermare</span>':""}</span>${dueHTML(p.s)}</li>`).join("")}</ul>`;
+}
+const giorni = dal=>{ const n = Math.round((new Date(OGGI+"T12:00:00")-new Date(dal+"T12:00:00"))/864e5); return n<=0?"da oggi":n===1?"1 giorno":n+" giorni"; };
+function attesaHTML(list){
+  if(!list.length) return `<div class="ph">Niente in attesa.</div>`;
+  return `<ul class="att">${list.map(v=>`<li><span>${esc(v.t)}</span><span class="gg">${v.dal?giorni(v.dal):""}</span>${v.a?`<span class="wh">aspetta: <b>${esc(v.a)}</b></span>`:""}</li>`).join("")}</ul>`;
+}
+
+/* ================= SCHERMATE ================= */
+function viewChiave(motivo){
+  return `<div class="view"><section class="box key">
+    <h1>Cruscotto di lavoro</h1>
+    <p>Scrivi la password per aprire i dati.</p>
+    ${motivo==="sbagliata"?`<div class="err">Password sbagliata, riprova.</div>`:""}
+    ${motivo==="cambiata"?`<div class="err">La password è cambiata: scrivi quella nuova.</div>`:""}
+    <form class="mini-form" id="form-chiave"><label for="in-chiave">Password</label>
+      <input id="in-chiave" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false">
+      <button class="sbtn pri">Apri</button>
+      <label class="ricorda"><input type="checkbox" id="in-ricorda" checked> Ricorda su questo dispositivo</label>
+    </form>
+  </section></div>`;
+}
+
+function viewClienti(){
+  const I = D.indice;
+  return `<div class="view">
+  <div><h1>Clienti</h1></div>
+  <section class="box">
+    <ul class="clients">${I.clienti.map(c=>{
+      if(c.stato==="in-arrivo") return `<li><div class="client off"><div class="name">${esc(c.nome)}</div><span class="soon">in arrivo</span></div></li>`;
+      const att = c.attesa?`<span class="attn">${c.attesa} in attesa</span>`:"";
+      return `<li><a class="client" href="#c/${c.id}">
+        <div><div class="name">${esc(c.nome)}${att}</div><div class="meta" id="meta-${c.id}">${c.risultati?"":"Risultati in arrivo"}</div></div>
+        <div id="val-${c.id}">${c.risultati?"":`<span class="soon">in arrivo</span>`}</div>
+        <div class="spark" id="sp-${c.id}"></div></a></li>`;
+    }).join("")}</ul>
+    ${fonte("la casella Risultati di ogni cliente. Il numero è il KPI principale scritto nella sua scheda, ultimo mese chiuso.")}
+  </section>
+  </div>`;
+}
+async function initClienti(){
+  const draw = ()=>{
+    D.indice.clienti.filter(c=>c.risultati && c.kpi && D.risultati[c.id]).forEach(c=>{
+      const {mesi, vals} = serieKpi(c.id, c.kpi), i = ultimoChiuso(mesi);
+      const v = vals[i], p = vals[i-1];
+      $(`#meta-${c.id}`).textContent = `${c.kpi.nome}, ${nomeMese(mesi[i]).toLowerCase()}`;
+      let tr = "";
+      if(v!=null && p!=null && v!==p){ const up=v>p; tr = `<div class="trend ${up?"up":"dn"}">${arrow(up?"up":"down")} ${eur(Math.abs(v-p))} su ${nomeMese(mesi[i-1]).toLowerCase()}</div>`; }
+      $(`#val-${c.id}`).innerHTML = `<div class="val num">${fmtKpi(c.kpi, v)}</div>${tr}`;
+      spark($(`#sp-${c.id}`), vals.slice(0, i+1));
+    });
+  };
+  await Promise.all(D.indice.clienti.filter(c=>c.risultati).map(c=>caricaCliente(c.id).catch(()=>null)));
+  if(!$("#app .clients")) return null;
+  draw();
+  return draw;
+}
+
+function viewCliente(c){
+  const S = c.scheda||{}, kpi = S.kpi||[], var_ = c.variazioni||{stato:"in-arrivo"};
+  const ris = c.risultati && kpi.length;
+  return `<div class="view">
+  <div><a class="back" href="#clienti">&#8249; Clienti</a><h1>${esc(c.nome)}</h1>${c.sotto?`<div class="sub">${esc(c.sotto)}</div>`:""}</div>
+
+  <section class="box" id="ris">
+    <h2>Risultati</h2>
+    ${ris ? `<div class="kpis" id="kpis"></div>
+    <div style="height:14px"></div>
+    <div class="chips" role="group" aria-label="Numero da mostrare">${kpi.map((k,i)=>`<button class="chip" data-met="${i}" aria-pressed="${i===0}">${esc(k.nome)}</button>`).join("")}</div>
+    <div class="readout" id="readout"></div>
+    <div class="chart" id="chartC"></div>
+    <div class="legend-mark"><i>3</i> variazioni nel mese: tocca il segno</div>
+    <div id="pop"></div>` : inArrivo("I numeri arriveranno da soli dalle piattaforme.")}
+    ${fonte(FONTI.risultati(c.id))}
+  </section>
+
+  <section class="box">
+    <h2>Variazioni</h2>
+    <div id="var-body">${var_.stato==="ok" ? variazioniHTML(var_.righe,false) : inArrivo("Il registro di questo cliente non è ancora nel formato nuovo.")}</div>
+    ${fonte(FONTI.variazioni)}
+  </section>
+
+  <section class="box">
+    <h2>Prossimi passi</h2>
+    ${passiHTML(c.passi||[])}
+    ${fonte(FONTI.passi)}
+  </section>
+
+  <section class="box">
+    <h2>In attesa</h2>
+    ${attesaHTML(c.attesa||[])}
+    ${fonte(FONTI.attesa)}
+  </section>
+
+  <details class="box"><summary><h2>Scheda</h2></summary><div class="in">
+    ${S.stato==="ok" ? `
+    <div class="sk"><h3>KPI</h3>${kpi.length?`<ul>${kpi.map(k=>`<li>${esc(k.nome)}${k.nota?": "+esc(k.nota):""}</li>`).join("")}</ul>`:`<div class="ph">Vuota. Si riempie quando la detti.</div>`}</div>
+    <div class="sk"><h3>Obiettivi e accordi</h3>${S.obiettivi.length?`<ul>${S.obiettivi.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<div class="ph">Vuota. Si riempie quando la detti.</div>`}</div>
+    <div class="sk"><h3>Moodboard</h3>${S.moodboard.length?`<ul>${S.moodboard.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<div class="ph">Vuota. Si riempie quando la detti.</div>`}</div>`
+    : inArrivo("La scheda di questo cliente non c'è ancora.")}
+    ${fonte(FONTI.scheda(c.id))}
+  </div></details>
+
+  <details class="box"><summary><h2>Spunti rinnovo</h2></summary><div class="in">
+    ${(S.spunti||[]).length ? `<ul class="steps">${S.spunti.map(x=>`<li><span>${esc(typeof x==="string"?x:(x.t||""))}</span>${x.d?`<span class="due">${dm(x.d)}</span>`:""}</li>`).join("")}</ul>` : `<div class="ph">Nessuno spunto. Dettalo in sessione o da Telegram con il nome del cliente.</div>`}
+    ${fonte(FONTI.spunti(c.id))}
+  </div></details>
+  </div>`;
+}
+
+function initCliente(c){
+  const root = $("#app");
+  let allVar = false;
+  root.addEventListener("click", e=>{
+    if(!e.target.closest("[data-toggle-var]")) return;
+    allVar = !allVar; $("#var-body").innerHTML = variazioniHTML(c.variazioni.righe, allVar);
+  });
+  const kpi = (c.scheda||{}).kpi||[];
+  if(!(c.risultati && kpi.length)) return null;
+  const righe = D.risultati[c.id]||[];
+  const mesi = mesiDa(righe);
+  if(!mesi.length){ $("#chartC").innerHTML = `<div class="ph">Nessun dato ancora nell'archivio.</div>`; return null; }
+  const parziale = mesi[mesi.length-1]===OGGI.slice(0,7);
+  const fino = ultimoGiorno(righe);
+  const chiuso = ultimoChiuso(mesi);
+  const vars = (c.variazioni&&c.variazioni.stato==="ok") ? c.variazioni.righe : [];
+  const marks = {}; vars.forEach(v=>{ const i = mesi.indexOf(v.d.slice(0,7)); if(i>=0) marks[i]=(marks[i]||0)+1; });
+  $("#kpis").innerHTML = kpi.map(k=>{ const {vals} = serieKpi(c.id,k); return `<div class="kpi"><div class="l">${esc(k.nome)}, ${nomeMese(mesi[chiuso]).toLowerCase()}</div><div class="v num">${fmtKpi(k, vals[chiuso])}</div></div>`; }).join("");
+  let met = 0, sel = chiuso, openMark = null;
+  const draw = ()=>{
+    const k = kpi[met], {vals} = serieKpi(c.id,k);
+    const sc = scala(Math.max(0,...vals.filter(v=>v!=null)));
+    barChart($("#chartC"), vals, mesi.map(m=>MESI[+m.slice(5,7)-1]), {...sc, sel, marks, openMark, parziale,
+      aria:`${k.nome} mese per mese, da ${nomeMese(mesi[0]).toLowerCase()} a ${nomeMese(mesi[mesi.length-1]).toLowerCase()}`});
+    const v = vals[sel], m = mesi[sel], inCorso = parziale && sel===mesi.length-1;
+    $("#readout").innerHTML = v==null
+      ? `${nomeMese(m)}: <b>n.d.</b>${k.dal?` (dato affidabile dal ${dm(k.dal)}/${k.dal.slice(2,4)})`:""}`
+      : `${nomeMese(m)}${inCorso?`, fino al ${dm(fino)}`:""}: <b class="num">${fmtKpi(k,v)}</b> ${esc(k.nome.toLowerCase())}`;
+  };
+  const showPop = i=>{
+    const rows = vars.filter(v=>v.d.slice(0,7)===mesi[i]), shown = rows.slice(0,4);
+    $("#pop").innerHTML = `<div class="pop"><h3>${nomeMese(mesi[i])}: ${rows.length} ${rows.length===1?"variazione":"variazioni"}</h3>${shown.map(rigaVar).join("")}${rows.length>4?`<button class="more" data-allvar>Le altre ${rows.length-4} in Variazioni</button>`:""}</div>`;
+  };
+  draw();
+  root.addEventListener("click", e=>{
+    const mk = e.target.closest("[data-mark]");
+    if(mk){ const i=+mk.dataset.mark; openMark = openMark===i?null:i; sel=i; draw(); if(openMark==null) $("#pop").innerHTML=""; else showPop(i); return; }
+    const b = e.target.closest("[data-bar]");
+    if(b){ sel=+b.dataset.bar; draw(); return; }
+    const ch = e.target.closest("[data-met]");
+    if(ch){ met=+ch.dataset.met; root.querySelectorAll("[data-met]").forEach(x=>x.setAttribute("aria-pressed", x===ch)); draw(); return; }
+    if(e.target.closest("[data-allvar]")){ allVar=true; $("#var-body").innerHTML=variazioniHTML(vars,true); $("#var-body").scrollIntoView({behavior:"smooth",block:"start"}); }
+  });
+  return draw;
+}
+
+/* ---------- Oggi: elenco e foglio A4 dalle stesse voci ---------- */
+function listaOggiHTML(bl){
+  if(!bl.length) return `<div class="ph">Niente per oggi.</div>`;
+  return bl.map(b=>`<div class="cli-blk"><div class="cli-h">${esc(b.nome)}<span>${b.voci.length}</span></div><ul class="steps">${b.voci.map(v=>`<li><span class="tx">${esc(v.t)}${v.dc?' <span class="tag dc">da confermare</span>':""}</span>${dueHTML(v.s)}</li>`).join("")}</ul></div>`).join("");
+}
+function foglioHTML(bl){
+  const n = bl.reduce((a,b)=>a+b.voci.length,0);
+  const L = v=>`<li><span>${esc(v.t)}</span><em class="${late(v.s)?"late":""}">${(late(v.s)?"scad. ":"")+dm(v.s)}</em></li>`;
+  const att = D.indice.clienti.filter(c=>c.attesa).map(c=>`<span>${esc(c.nome)} <b class="num">${c.attesa}</b></span>`).join("");
+  const t = dataLunga(OGGI);
+  return `<div class="sheet-in">
+    <div class="sh-head"><b>${t.charAt(0).toUpperCase()+t.slice(1)}</b><span>Lavoro ${n}</span></div>
+    <div class="sh-cols">${bl.map(b=>`<div class="sh-blk"><h4>${esc(b.nome)}<span>${b.voci.length}</span></h4><ul>${b.voci.map(L).join("")}</ul></div>`).join("")}</div>
+    <div class="sh-att"><span class="k">In attesa</span>${att||"<span>nessuna</span>"}</div>
+    <div class="sh-foot"><span>Ordinato per cliente, scadenza dentro il blocco</span><span>Cruscotto PS Company</span></div>
+  </div>`;
+}
+function viewOggi(){
+  const bl = D.indice.blocchi_oggi||[];
+  return `<div class="view">
+  <div class="sec-h"><div><h1>Oggi</h1><div class="sub">To-do di lavoro con scadenza fino a oggi</div></div><button class="sbtn btn-print" data-stampa>Stampa</button></div>
+  <section class="box">
+    ${listaOggiHTML(bl)}
+    ${fonte("archivio dei to-do, solo lavoro. Le voci in attesa non compaiono qui. Per ora si guardano soltanto: i pulsanti per sistemarle arrivano con la tappa 2.")}
+  </section>
+  <div class="lab">La stampa, A4</div>
+  <div class="sheet-wrap"><div class="sheet" id="sheet">${foglioHTML(bl)}</div></div>
+  </div>`;
+}
+function initOggi(){
+  $("#app").addEventListener("click", e=>{ if(e.target.closest("[data-stampa]")) window.print(); });
+  return null;
+}
+
+function viewVuota(titolo, sotto, testo, fonteTxt){
+  return `<div class="view"><div><h1>${titolo}</h1><div class="sub">${sotto}</div></div>
+  <section class="box">${inArrivo(testo)}${fonte(fonteTxt)}</section></div>`;
+}
+
+/* ---------- Come funziona ---------- */
+const CASI = [
+  {t:"Mi viene in mente una cosa", s:[
+    [["tg"],"Scrivi al bot Telegram, come oggi."],
+    [["a-tg","todo"],"Claude la smista: capisce il cliente e la mette nei to-do di lavoro."],
+    [["a-oggi","oggi","a-passi","passi"],"Compare in Oggi e nei Prossimi passi del cliente."]]},
+  {t:"Devo spostare o cancellare una voce", s:[
+    [["oggi"],"In Oggi tocchi la voce, poi Sposta o Elimina. Arriva con la tappa 2."],
+    [["a-oggi","todo"],"Il Cruscotto lo scrive nei to-do. Fine, nessuna sessione da aprire."]]},
+  {t:"Dipende da qualcun altro", s:[
+    [["oggi"],"Tocchi Metti in attesa e scrivi chi o cosa la sblocca. Arriva con la tappa 2."],
+    [["attesa"],"Esce da Oggi, senza data. Resta visibile in In attesa, nel cliente."],
+    [["passi"],"Quando arriva, tocchi Sbloccata: torna nei Prossimi passi."]]},
+  {t:"La passo a Dario", s:[
+    [["oggi"],"Tocchi Passa a, poi Dario. Si accende quando il team userà TASS."],
+    [["a-out","tass"],"Diventa un task di Dario in TASS ed esce dai tuoi."],
+    [["a-in","passi"],"La rivedi nel cliente, con il suo nome, in sola lettura."]]},
+  {t:"Claude modifica una campagna", s:[
+    [["cl"],"Claude modifica la campagna mentre lavorate."],
+    [["a-cl","varA"],"Propone la riga della variazione. La approvi tu."],
+    [["a-var","var"],"La riga compare in Variazioni."],
+    [["plat","a-plat","risA","a-ris","ris"],"Il numero arriva da solo in Risultati."]]}
+];
+function diagramma(){
+  const N = (k,x,y,w,h,l,sub,cls="")=>{
+    const cx = x+w/2, cy = y+h/2;
+    return `<g class="n ${cls}" data-k="${k}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7"/>`+
+      (sub ? `<text class="nl" x="${cx}" y="${cy-3}" text-anchor="middle">${l}</text><text class="ns" x="${cx}" y="${cy+12}" text-anchor="middle">${sub}</text>`
+           : `<text class="nl" x="${cx}" y="${cy+4.5}" text-anchor="middle">${l}</text>`)+`</g>`;
+  };
+  const A = (k,x,y1,y2,lab="",lx=0,ly=0,anc="start",dbl=false)=>{
+    const d = Math.sign(y2-y1), h = 7;
+    const head = (yy,dd)=>`<polygon points="${x-4.5},${yy-dd*h} ${x+4.5},${yy-dd*h} ${x},${yy}"/>`;
+    return `<g class="ar" data-k="${k}"><line x1="${x}" y1="${dbl?y1+d*h:y1}" x2="${x}" y2="${y2-d*h}"/>${head(y2,d)}${dbl?head(y1,-d):""}${lab?`<text x="${lx}" y="${ly}" text-anchor="${anc}">${lab}</text>`:""}</g>`;
+  };
+  return `<svg class="dg" id="dg" viewBox="-9 -2 378 502" role="img" aria-label="Telegram, riunioni, Claude e piattaforme scrivono in tre archivi: to-do di lavoro, variazioni, risultati. Il Cruscotto legge gli archivi e mostra Oggi e la scheda cliente; Oggi si stampa. TASS è la stanza del team, con una freccia in uscita e una in entrata. Il personale è a parte.">
+  <g class="bg">
+    <rect class="fr" x="-6" y="212" width="372" height="102" rx="10"/>
+    <rect class="lg-bg" x="136" y="205" width="80" height="14"/>
+    <text class="lg" x="176" y="216" text-anchor="middle">CRUSCOTTO</text>
+    <rect class="sch" x="72" y="220" width="290" height="88" rx="7"/>
+    <text class="sch-l" x="190" y="291">Scheda cliente</text>
+  </g>
+  ${N("tg",0,0,84,46,"Telegram","scrivi al bot")}
+  ${N("riu",92,0,84,46,"Riunioni","riviste")}
+  ${N("cl",184,0,84,46,"Claude","modifica")}
+  ${N("plat",276,0,84,46,"Piattaforme","Google, Meta")}
+  ${A("a-tg",42,48,98,"smista",48,78)}
+  ${A("a-riu",134,48,98)}
+  ${A("a-cl",226,48,98,"approvi",232,78)}
+  ${A("a-plat",318,48,98,"da sole",324,78)}
+  ${N("todo",0,100,176,44,"To-do di lavoro","archivio")}
+  ${N("varA",184,100,84,44,"Variazioni","archivio")}
+  ${N("risA",276,100,84,44,"Risultati","archivio")}
+  ${A("a-oggi",35,146,224,"sistemi",41,182,"start",true)}
+  ${A("a-passi",127,146,224)}
+  ${A("a-var",226,146,224)}
+  ${A("a-ris",318,146,224)}
+  ${N("oggi",0,226,70,34,"Oggi","","c")}
+  ${N("passi",78,226,98,34,"Prossimi passi","","c")}
+  ${N("var",184,226,84,34,"Variazioni","","c")}
+  ${N("ris",276,226,84,34,"Risultati","","c")}
+  ${N("attesa",78,268,98,34,"In attesa","","c")}
+  ${A("a-stampa",35,262,350)}
+  ${N("stampa",0,352,70,44,"Stampa","foglio A4")}
+  ${A("a-out",214,316,370,"passo a un collega",208,340,"end")}
+  ${A("a-in",330,370,316,"vedo i loro task",324,357,"end")}
+  ${N("tass",150,372,210,56,"TASS","stanza del team","dash")}
+  <g class="bg pers"><rect x="0" y="452" width="124" height="44" rx="7"/><text class="pl" x="62" y="471" text-anchor="middle">Personale</text><text class="ps" x="62" y="486" text-anchor="middle">a parte</text></g>
+  </svg>`;
+}
+function viewCome(){
+  return `<div class="view">
+  <div><h1>Come funziona</h1><div class="sub">Ogni casella legge da un solo archivio</div></div>
+  <section class="box">
+    <figure class="dg-fig" id="dgfig">
+      <div class="dg-wrap">${diagramma()}</div>
+      <div class="step" id="step" aria-live="polite"></div>
+    </figure>
+  </section>
+  <section class="box">
+    <h2>Prova un caso</h2>
+    <div class="casi">${CASI.map((c,i)=>`<button class="caso" data-caso="${i}" aria-pressed="false">${c.t}</button>`).join("")}</div>
+  </section>
+  <section class="box">
+    <h2>Cosa usi</h2>
+    <ul class="uso">
+      <li><b>Telegram</b><span>butti dentro</span></li>
+      <li><b>Cruscotto</b><span>guardi e sistemi</span></li>
+      <li><b>Claude</b><span>lavori</span></li>
+    </ul>
+    <div class="nota"><span>Solo lavoro. Il personale avrà una pagina sua.</span><span>TASS è del team: i tuoi to-do non ci entrano. Il legame si accende quando il team userà TASS.</span></div>
+  </section>
+  <section class="box">
+    <h2>Quando si aggiorna</h2>
+    <ul class="uso">
+      <li><b>Risultati</b><span>ogni mattina, da soli, anche a Mac spento</span></li>
+      <li><b>Il resto</b><span>dopo il foglio del mattino e quando lo chiedi a Claude</span></li>
+    </ul>
+    ${CIFRATO?`<div class="btns"><button class="sbtn dng" data-togli-chiave>Esci da questo dispositivo</button></div>`:""}
+  </section>
+  </div>`;
+}
+let comeT;
+function initCome(){
+  const root = $("#app"), dg = $("#dg"), step = $("#step");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let ci = null, si = 0, auto = false;
+  const show = ()=>{
+    clearTimeout(comeT);
+    dg.querySelectorAll("[data-k]").forEach(g=>g.classList.remove("on","now"));
+    if(ci==null){ dg.classList.remove("play"); step.innerHTML = `<div class="tx idle">Scegli un caso qui sotto: il disegno si accende passo per passo.</div>`; return; }
+    const c = CASI[ci];
+    dg.classList.add("play");
+    c.s.slice(0,si+1).forEach((st,i)=>st[0].forEach(k=>{ const g = dg.querySelector(`[data-k="${k}"]`); if(!g) return; g.classList.add("on"); if(i===si) g.classList.add("now"); }));
+    step.innerHTML = `<div class="nb">${esc(c.t)} · passo ${si+1} di ${c.s.length}</div>
+      <div class="nav"><button data-st="-1" aria-label="Passo precedente" ${si?"":"disabled"}>&#8249;</button><button data-st="1" aria-label="Passo successivo" ${si<c.s.length-1?"":"disabled"}>&#8250;</button></div>
+      <div class="tx">${c.s[si][1]}</div>`;
+    if(auto && si<c.s.length-1) comeT = setTimeout(()=>{ si++; show(); }, 2600);
+  };
+  show();
+  root.addEventListener("click", e=>{
+    if(e.target.closest("[data-togli-chiave]")){ salvaChiave(""); location.hash="#clienti"; location.reload(); return; }
+    const b = e.target.closest("[data-caso]");
+    if(b){
+      ci = +b.dataset.caso; si = 0; auto = true;
+      root.querySelectorAll("[data-caso]").forEach(x=>x.setAttribute("aria-pressed", x===b));
+      $("#dgfig").scrollIntoView({behavior:reduce?"auto":"smooth", block:"start"});
+      show(); return;
+    }
+    const s = e.target.closest("[data-st]");
+    if(s && ci!=null){ auto = false; si = Math.max(0, Math.min(CASI[ci].s.length-1, si + +s.dataset.st)); show(); }
+  });
+  return null;
+}
+
+/* ================= ROUTER ================= */
+let redraw = null, giro = 0;
+function monta(html){
+  const old = $("#app"), fresh = old.cloneNode(false); old.replaceWith(fresh); fresh.innerHTML = html; return fresh;
+}
+function segnaTab(tab){
+  document.querySelectorAll("nav.tabs a").forEach(a=>{ if(a.dataset.tab===tab) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+}
+function mostraChiave(motivo){
+  segnaTab(null); monta(viewChiave(motivo)); redraw = null;
+  const f = $("#form-chiave"), b = f.querySelector("button");
+  f.addEventListener("submit", async e=>{
+    e.preventDefault(); const v = $("#in-chiave").value; if(!v) return;
+    b.disabled = true; b.textContent = "Apro...";
+    let k;
+    try{ k = await apriConPassword(v); }
+    catch(err){ if(err instanceof DOMException || err.name==="OperationError"){ mostraChiave("sbagliata"); return; } throw err; }
+    salvaChiave(k, $("#in-ricorda").checked); CHIAVE = null;
+    D.indice = null; D.clienti = {}; D.risultati = {}; route();
+  });
+  $("#in-chiave").focus();
+}
+async function route(){
+  const mio = ++giro;
+  clearTimeout(comeT);
+  let key = (location.hash||"#clienti").slice(1);
+  document.body.classList.toggle("stampa-oggi", key==="oggi");
+  try{
+    if(!D.indice){
+      monta(`<div class="view"><div class="ph">Carico i dati...</div></div>`);
+      D.indice = await leggi("indice.json");
+      if(!D.indice) throw new Error("indice.json mancante nell'archivio");
+      OGGI = D.indice.oggi || OGGI;
+      $("#data-oggi").textContent = dataLunga(OGGI);
+      if(mio!==giro) return;
+    }
+    if(key.startsWith("c/")){
+      const id = key.slice(2);
+      segnaTab("clienti");
+      const c = await caricaCliente(id);
+      if(mio!==giro) return;
+      if(!c){ location.hash = "#clienti"; return; }
+      monta(viewCliente(c)); redraw = initCliente(c);
+    } else if(key==="oggi"){ segnaTab("oggi"); monta(viewOggi()); redraw = initOggi(); }
+    else if(key==="posta"){ segnaTab("posta"); monta(viewVuota("Posta","Lavoro","Il report della posta arriva qui con la tappa 4. Per ora resta sulla Torre del Mac.","foglio/posta.json, scritto dal triage della posta.")); redraw = null; }
+    else if(key==="automazioni"){ segnaTab("automazioni"); monta(viewVuota("Automazioni","Cosa gira al posto tuo","Lo stato delle automazioni arriva qui con la tappa 4. Per ora resta sulla Torre del Mac.","registro-automazioni.jsonl. Ogni automazione scrive una riga a fine giro.")); redraw = null; }
+    else if(key==="come-funziona"){ segnaTab("come-funziona"); monta(viewCome()); redraw = initCome(); }
+    else { segnaTab("clienti"); monta(viewClienti()); redraw = null; const d = await initClienti(); if(mio===giro) redraw = d; }
+    window.scrollTo(0,0);
+  } catch(err){
+    if(mio!==giro) return;
+    if(err instanceof ErroreChiave){ mostraChiave(err.message); return; }
+    monta(`<div class="view"><section class="box"><h2>Dati non disponibili</h2><div class="ph">${esc(err.message||err)}. Riprova fra poco o ricarica la pagina.</div></section></div>`);
+  }
+}
+window.addEventListener("hashchange", route);
+let rt; window.addEventListener("resize", ()=>{ clearTimeout(rt); rt=setTimeout(()=>redraw&&redraw(),120); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", ()=>redraw&&redraw());
+route();
+</script>
+</body>
+</html>
