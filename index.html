@@ -376,9 +376,16 @@ body.largo main,body.largo .top-in{max-width:1120px}
 .kps li:last-child{border-bottom:0}
 .kps li.ed{display:block}
 .kps li.ed::before{display:none}
-.kp-t{overflow-wrap:anywhere}
-.kp-t[data-kp-mod]{cursor:text}
-.kp-t b{font-weight:700;color:var(--ink)}
+.kp-t{overflow-wrap:anywhere;min-width:0}
+.kp-tit{display:flex;align-items:baseline;justify-content:space-between;gap:8px;width:100%;font:inherit;font-weight:600;color:var(--ink);text-align:left;background:none;border:0;padding:0;line-height:1.4}
+button.kp-tit{cursor:pointer}
+.kp-fr{flex:none;color:var(--ink-3);transform:translateY(3px);transition:transform .15s}
+.kps li.open .kp-fr{transform:translateY(3px) rotate(180deg)}
+.kp-desc{display:none;margin-top:6px;font-size:15px;color:var(--ink-2);line-height:1.45}
+.kps li.open .kp-desc{display:block}
+.kp-desc b{font-weight:700;color:var(--ink)}
+.kp-tin{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:16px;font-weight:600;color:var(--ink);background:none;border:0;border-bottom:1px solid var(--line);padding:10px 12px;outline:none}
+.kp-tin::placeholder{color:var(--ink-3);font-weight:500}
 .kp-az{display:flex;gap:2px;align-items:center}
 .kps .x{border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1;cursor:pointer;padding:3px 6px;border-radius:6px;display:inline-flex;align-items:center}
 .kps .x:hover{color:var(--ink);background:var(--sunk)}
@@ -744,7 +751,7 @@ function pannelloRisultati(c){
    la chiave dati, e ogni dispositivo aperto con la password la prende da lì. In anteprima locale i punti
    restano nel browser. */
 const GH_LS = "cruscotto-lavoro-gh", GH_REPO = "PaoloB91/cruscotto-lavoro-dati", GH_FILE = "scrittura.json";
-const KP_MAX = 5, KP_TETTO = 600;
+const KP_MAX = 5, KP_TETTO = 800;
 class ErroreGh extends Error {}
 let ghScaduta = false;
 function leggiGh(){ try{ return localStorage.getItem(GH_LS)||""; }catch(e){ return ""; } }
@@ -825,15 +832,29 @@ function daEditor(el){
   walk(el, false);
   return out.replace(/\*{4}/g,"").replace(/\n{3,}/g,"\n\n").trim();
 }
-const kpEditor = (t, k="")=>`<div class="kp-ed" data-kp-ed="${esc(k)}"><div class="kp-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Testo del punto" data-ph="Scrivi il punto">${kpTesto(t)}</div>
-  <div class="kp-bar"><button type="button" class="kp-b" data-kp-bold aria-label="Grassetto"><b>B</b></button><span></span><button type="button" class="sbtn" data-kp-annulla>Annulla</button><button type="button" class="sbtn pri" data-kp-salva>Salva</button></div></div>`;
+/* Un punto = titolo (prima riga) + descrizione facoltativa (il resto). Stesso campo t di prima. */
+function kpParti(t){
+  const i = t.indexOf("\n");
+  return {tit:(i<0?t:t.slice(0,i)).replace(/\*\*/g,"").trim(), desc:i<0?"":t.slice(i+1).trim()};
+}
+const KP_TIT = 120;
+const kpEditor = (t, k="")=>{ const {tit, desc} = kpParti(t); return `<div class="kp-ed" data-kp-ed="${esc(k)}">
+  <input class="kp-tin" maxlength="${KP_TIT}" value="${esc(tit)}" placeholder="Titolo" aria-label="Titolo del punto" enterkeyhint="next" autocomplete="off">
+  <div class="kp-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrizione" data-ph="Descrizione (facoltativa)">${kpTesto(desc)}</div>
+  <div class="kp-bar"><button type="button" class="kp-b" data-kp-bold aria-label="Grassetto"><b>B</b></button><span></span><button type="button" class="sbtn" data-kp-annulla>Annulla</button><button type="button" class="sbtn pri" data-kp-salva>Salva</button></div></div>`; };
 const MATITA = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4z"/></svg>`;
+const FRECCIA = `<svg class="kp-fr" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
+function kpVoce(p, scrive){
+  const {tit, desc} = kpParti(p.t||"");
+  const testa = desc ? `<button class="kp-tit" data-kp-apri aria-expanded="false"><span>${esc(tit)}</span>${FRECCIA}</button>` : `<div class="kp-tit"><span>${esc(tit)}</span></div>`;
+  return `<li data-k="${esc(p.k)}"><div class="kp-t">${testa}${desc?`<div class="kp-desc">${kpTesto(desc)}</div>`:""}</div>${scrive?`<span class="kp-az"><button class="x" data-kp-mod aria-label="Modifica questo punto">${MATITA}</button><button class="x" data-kp-via="${esc(p.k)}" aria-label="Togli questo punto">&times;</button></span>`:"<span></span>"}</li>`;
+}
 function kpHTML(st){
   const punti = st.punti||[], scrive = !CIFRATO || !!leggiGh();
   const attiva = `<button class="kp-link" data-kp-collega>${ghScaduta?"Chiave di GitHub scaduta: rinnovala":"Attiva la scrittura (una volta sola)"}</button>`;
   if(st.nonLetti && !punti.length) return `<div class="ph">Punti non letti: GitHub non risponde. Ricarica fra un minuto.</div>` + (scrive ? "" : attiva);
   let h = punti.length
-    ? `<ul class="kps">${punti.map(p=>`<li data-k="${esc(p.k)}"><div class="kp-t"${scrive?` data-kp-mod tabindex="0"`:""}>${kpTesto(p.t)}</div>${scrive?`<span class="kp-az"><button class="x" data-kp-mod aria-label="Modifica questo punto">${MATITA}</button><button class="x" data-kp-via="${esc(p.k)}" aria-label="Togli questo punto">&times;</button></span>`:"<span></span>"}</li>`).join("")}</ul>`
+    ? `<ul class="kps">${punti.map(p=>kpVoce(p, scrive)).join("")}</ul>`
     : `<div class="ph">Nessun punto.</div>`;
   if(scrive){
     h += punti.length<KP_MAX
@@ -879,12 +900,13 @@ async function initKeyPoints(c){
     const el = k ? body.querySelector(`li[data-k="${CSS.escape(k)}"]`) : body.querySelector("[data-kp-nuovo]");
     if(!el) return;
     if(k){ el.classList.add("ed"); el.innerHTML = kpEditor(t, k); } else el.outerHTML = kpEditor("", "");
-    const a = body.querySelector(".kp-area"); a.focus();
-    const r = document.createRange(); r.selectNodeContents(a); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    const ti = body.querySelector(".kp-tin"); ti.focus(); ti.setSelectionRange(ti.value.length, ti.value.length);
   };
   const salva = async ed=>{
-    const k = ed.dataset.kpEd, t = daEditor(ed.querySelector(".kp-area")), bt = ed.querySelector("[data-kp-salva]");
-    if(!t){ toast("Il punto è vuoto"); return; }
+    const k = ed.dataset.kpEd, bt = ed.querySelector("[data-kp-salva]");
+    const tit = ed.querySelector(".kp-tin").value.replace(/\s+/g," ").trim(), desc = daEditor(ed.querySelector(".kp-area"));
+    if(!tit){ toast("Manca il titolo"); ed.querySelector(".kp-tin").focus(); return; }
+    const t = desc ? `${tit}\n${desc}` : tit;
     if(t.length>KP_TETTO){ toast(`Troppo lungo: ${t.length} caratteri su ${KP_TETTO}`); return; }
     bt.disabled = true;
     try{
@@ -899,10 +921,9 @@ async function initKeyPoints(c){
     if(ed){
       if(e.key==="Enter" && (e.metaKey||e.ctrlKey)){ e.preventDefault(); salva(ed); }
       else if(e.key==="Escape"){ e.preventDefault(); mostra(); }
+      else if(e.key==="Enter" && e.target.matches(".kp-tin")){ e.preventDefault(); ed.querySelector(".kp-area").focus(); }
       return;
     }
-    const m = e.target.closest?.(".kp-t[data-kp-mod]");
-    if(m && e.key==="Enter"){ e.preventDefault(); const k = m.closest("li").dataset.k; apriEditor(null, (st.punti.find(p=>p.k===k)||{}).t||"", k); }
   });
   root.addEventListener("click", async e=>{
     if(!body.contains(e.target)) return;
@@ -911,6 +932,8 @@ async function initKeyPoints(c){
     if(e.target.closest("[data-kp-annulla]")){ mostra(); return; }
     const ed = e.target.closest("[data-kp-salva]")?.closest(".kp-ed"); if(ed){ salva(ed); return; }
     if(e.target.closest("[data-kp-nuovo]")){ apriEditor(null, "", ""); return; }
+    const ap = e.target.closest("[data-kp-apri]");
+    if(ap){ const li = ap.closest("li"), o = li.classList.toggle("open"); ap.setAttribute("aria-expanded", o); return; }
     const m = e.target.closest("[data-kp-mod]");
     if(m && !e.target.closest("a")){ const k = m.closest("li").dataset.k; apriEditor(null, (st.punti.find(p=>p.k===k)||{}).t||"", k); return; }
     const x = e.target.closest("[data-kp-via]"); if(!x) return;
