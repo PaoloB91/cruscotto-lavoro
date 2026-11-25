@@ -723,12 +723,26 @@ function pannelloRisultati(c){
 
 /* ---------- Key Points: appunti/<cliente>.json nell'archivio dati, cifrato. Li scrive solo Paolo, da qui.
    Per scrivere serve una chiave GitHub fine-grained limitata a cruscotto-lavoro-dati (Contents: lettura
-   e scrittura), creata da Paolo e tenuta solo sul dispositivo. In anteprima locale restano nel browser. */
-const GH_LS = "cruscotto-lavoro-gh", GH_REPO = "PaoloB91/cruscotto-lavoro-dati";
+   e scrittura), creata da Paolo. La incolla una volta: la pagina la deposita in scrittura.json, cifrata con
+   la chiave dati, e ogni dispositivo aperto con la password la prende da lì. In anteprima locale i punti
+   restano nel browser. */
+const GH_LS = "cruscotto-lavoro-gh", GH_REPO = "PaoloB91/cruscotto-lavoro-dati", GH_FILE = "scrittura.json";
 const KP_MAX = 5, KP_TETTO = 100;
 class ErroreGh extends Error {}
+let ghScaduta = false;
 function leggiGh(){ try{ return localStorage.getItem(GH_LS)||""; }catch(e){ return ""; } }
 function salvaGh(v){ try{ v ? localStorage.setItem(GH_LS, v) : localStorage.removeItem(GH_LS); }catch(e){} }
+async function prendiGh(){
+  if(!CIFRATO || ghScaduta || leggiGh()) return;
+  try{ const j = await leggi(GH_FILE); if(j && j.gh) salvaGh(j.gh); }catch(e){}
+}
+async function depositaGh(tok){
+  const r0 = await ghApi(`/contents/${GH_FILE}.cif?ref=main`, {}, tok);
+  const corpo = {message:"Chiave di scrittura del Cruscotto", branch:"main", content:b64e(await cifraTesto(JSON.stringify({gh:tok})+"\n"))};
+  if(r0.ok) corpo.sha = (await r0.json()).sha;
+  const r = await ghApi(`/contents/${GH_FILE}.cif`, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(corpo)}, tok);
+  if(!r.ok) throw new Error(r.status===403 ? "La chiave non ha il permesso di scrittura (Contents: Read and write)" : "GitHub: risposta "+r.status);
+}
 function ghApi(path, opt={}, tok=leggiGh()){
   return fetch(`https://api.github.com/repos/${GH_REPO}${path}`, {...opt, cache:"no-store",
     headers:{Authorization:`Bearer ${tok}`, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28", ...(opt.headers||{})}});
@@ -765,15 +779,16 @@ async function scriviAppunti(id, cambia){
   throw new Error("salvataggio non riuscito, riprova");
 }
 const chiaveGhHTML = ()=>`<form class="kp-key" data-kp-chiave>
-  <span>Serve una chiave di GitHub, una volta per dispositivo. La crei tu:</span>
-  <ol><li>apri <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub, nuova chiave</a></li>
-    <li>accesso solo all'archivio <b>cruscotto-lavoro-dati</b></li>
-    <li>permesso Contents: lettura e scrittura</li></ol>
-  <div class="kp-add"><input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla la chiave" aria-label="Chiave di GitHub"><button class="sbtn pri">Collega</button></div>
+  <span>${ghScaduta?"La chiave di GitHub è scaduta: creane una nuova.":"Una volta sola: poi su ogni dispositivo basta la password."}</span>
+  <ol><li>apri <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub, nuova chiave</a>, nome "Cruscotto", scadenza la più lunga</li>
+    <li>Repository access: <b>Only select repositories</b>, scegli <b>cruscotto-lavoro-dati</b></li>
+    <li>Permissions, Contents: <b>Read and write</b>, poi Generate token</li></ol>
+  <div class="kp-add"><input type="text" name="gh-token" autocomplete="off" data-1p-ignore data-lpignore="true" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Incolla qui la chiave" aria-label="Chiave di GitHub"><button class="sbtn pri">Attiva</button></div>
 </form>`;
 function kpHTML(st){
   const punti = st.punti||[], scrive = !CIFRATO || !!leggiGh();
-  if(st.nonLetti && !punti.length) return `<div class="ph">Punti non letti: GitHub non risponde. Ricarica fra un minuto.</div>` + (scrive ? "" : `<button class="kp-link" data-kp-collega>Scrivere da questo dispositivo</button>`);
+  const attiva = `<button class="kp-link" data-kp-collega>${ghScaduta?"Chiave di GitHub scaduta: rinnovala":"Attiva la scrittura (una volta sola)"}</button>`;
+  if(st.nonLetti && !punti.length) return `<div class="ph">Punti non letti: GitHub non risponde. Ricarica fra un minuto.</div>` + (scrive ? "" : attiva);
   let h = punti.length
     ? `<ul class="kps">${punti.map(p=>`<li><span>${esc(p.t)}</span>${scrive?`<button class="x" data-kp-via="${esc(p.k)}" aria-label="Togli questo punto">&times;</button>`:"<span></span>"}</li>`).join("")}</ul>`
     : `<div class="ph">Nessun punto${scrive?": scrivi qui sotto le cose da avere sott'occhio.":"."}</div>`;
@@ -782,7 +797,7 @@ function kpHTML(st){
       ? `<form class="kp-add" data-kp-form><input maxlength="${KP_TETTO}" placeholder="Aggiungi un punto" aria-label="Nuovo punto" enterkeyhint="done"><button class="sbtn pri">Aggiungi</button></form>`
       : `<div class="kp-nota">Al massimo ${KP_MAX} punti: togline uno per aggiungerne un altro.</div>`;
     if(!CIFRATO) h += `<div class="kp-nota">Anteprima sul Mac: i punti restano in questo browser.</div>`;
-  } else h += `<button class="kp-link" data-kp-collega>Scrivere da questo dispositivo</button>`;
+  } else h += attiva;
   return h;
 }
 async function initKeyPoints(c){
@@ -790,13 +805,14 @@ async function initKeyPoints(c){
   let st = {punti:[]};
   const mostra = ()=>{ if(body.isConnected) body.innerHTML = kpHTML(st); };
   const errore = err=>{
-    if(err instanceof ErroreGh){ salvaGh(""); mostra(); toast("La chiave di GitHub non vale più: ricollega il dispositivo"); }
+    if(err instanceof ErroreGh){ salvaGh(""); ghScaduta = true; mostra(); toast("La chiave di GitHub non vale più: rinnovala"); }
     else if(err instanceof ErroreChiave){ route(); }
     else toast(String(err.message||err));
   };
   /* Un errore momentaneo dell'archivio (es. 503 mentre GitHub ripubblica) non deve nascondere il riquadro:
      si ritenta una volta, poi si mostra comunque. La scrittura rilegge sempre dall'API, quindi non perde punti. */
-  const prova = async ()=>{ try{ return await leggiAppunti(c.id); } catch(err){ if(err instanceof ErroreGh){ salvaGh(""); return leggiAppunti(c.id); } throw err; } };
+  await prendiGh();
+  const prova = async ()=>{ try{ return await leggiAppunti(c.id); } catch(err){ if(err instanceof ErroreGh){ salvaGh(""); ghScaduta = true; return leggiAppunti(c.id); } throw err; } };
   try{ st = await prova(); }
   catch(err){ await new Promise(r=>setTimeout(r,2000)); st = await prova().catch(()=>({punti:[], nonLetti:true})); }
   mostra();
@@ -807,9 +823,11 @@ async function initKeyPoints(c){
     if(!v) return;
     bt.disabled = true;
     if(f.matches("[data-kp-chiave]")){
+      if(!/^(github_pat_|ghp_)/.test(v)){ bt.disabled = false; inp.value = ""; toast("Questa non è una chiave di GitHub: inizia con github_pat_"); return; }
       const r = await ghApi("", {}, v).catch(()=>null);
       if(!r || !r.ok){ bt.disabled = false; toast("Questa chiave non apre l'archivio cruscotto-lavoro-dati"); return; }
-      salvaGh(v); st = await leggiAppunti(c.id).catch(()=>st); mostra(); toast("Dispositivo collegato"); return;
+      try{ await depositaGh(v); }catch(err){ bt.disabled = false; toast(String(err.message||err)); return; }
+      salvaGh(v); ghScaduta = false; st = await leggiAppunti(c.id).catch(()=>st); mostra(); toast("Scrittura attiva, anche sugli altri dispositivi"); return;
     }
     try{ st = await scriviAppunti(c.id, p=>p.length>=KP_MAX ? p : [...p, {k:Date.now().toString(36), t:v.slice(0,KP_TETTO), d:OGGI}]); mostra(); body.querySelector("[data-kp-form] input")?.focus(); }
     catch(err){ bt.disabled = false; errore(err); }
