@@ -75,7 +75,6 @@ h1{font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-.015em;margin
 
 .box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
 .box h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:600;margin:0 0 12px}
-.fonte{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);line-height:1.5}
 .tag{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--warn-bg);color:var(--warn-ink);vertical-align:middle}
 
 /* Clienti */
@@ -319,6 +318,85 @@ body{margin:0}
 .key .ricorda{display:flex;align-items:center;gap:8px;font-size:14.5px;color:var(--ink-2);width:100%;margin-top:4px}
 .key .ricorda input{width:18px;height:18px;flex:none;margin:0}
 .btn-print{align-self:flex-start}
+
+/* Scheda cliente a schede interne. Sul Mac la pagina del cliente si allarga. */
+body.largo main,body.largo .top-in{max-width:1120px}
+.duo{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (min-width:900px){.duo{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:16px;align-items:start}.duo.pari{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cpanel{display:flex;flex-direction:column;gap:16px;min-width:0}
+.ctabs{display:flex;min-width:0}
+.ctabs a{text-decoration:none;color:var(--ink-2);font-weight:500;white-space:nowrap}
+.ctabs a .ic{display:none}
+.ctabs a .nn{font-size:12px;font-weight:600;color:var(--ink-3);margin-left:5px;font-variant-numeric:tabular-nums}
+/* Telefono: barra delle schede fissa in basso, come un'app. Mac: colonna a sinistra. */
+@media (max-width:799px){
+  body.largo main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .ctabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+  .ctabs a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;padding:4px 0;color:var(--ink-3)}
+  .ctabs a .ic{display:block;width:22px;height:22px}
+  .ctabs a .nn{display:none}
+  .ctabs a[aria-current="page"]{color:var(--accent);font-weight:600}
+  .duo .kp{order:-1}
+}
+@media (min-width:800px){
+  .cli-wrap{display:grid;grid-template-columns:172px minmax(0,1fr);gap:24px;align-items:start}
+  .ctabs{flex-direction:column;gap:2px;position:sticky;top:110px}
+  .ctabs a{display:flex;align-items:center;gap:10px;font-size:15.5px;padding:9px 12px;border-radius:8px}
+  .ctabs a .ic{display:block;width:18px;height:18px;flex:none}
+  .ctabs a>span{flex:1;display:flex;justify-content:space-between}
+  .ctabs a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+}
+@media (min-width:800px) and (max-width:899px){.duo .kp{order:-1}}
+
+/* To-do: voci staccate, testo corto, si aprono toccandole */
+.tl{list-style:none;margin:0;padding:0}
+.ti{cursor:pointer;min-width:0;outline-offset:2px}
+.ti-t{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:16px;line-height:1.4}
+.ti.open .ti-t{display:block;overflow:visible}
+.ti-tag{font-size:12px;font-weight:600;color:var(--ink-2);background:var(--sunk);border-radius:4px;padding:1px 7px;white-space:nowrap}
+.qd{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.qd.late{color:var(--bad);font-weight:500}
+.qd.oggi{color:var(--accent);font-weight:600}
+.ti-a{font-size:13.5px;color:var(--ink-2);margin-top:5px}
+.ti-a b{color:var(--ink);font-weight:600}
+.ti-sub{display:flex;gap:6px 10px;flex-wrap:wrap;align-items:baseline;margin-top:4px}
+.ti-sub .ti-a{margin-top:0}
+/* Da fare raggruppati per scadenza */
+.grp-h{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600;margin:16px 0 0;padding-bottom:4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.grp-h:first-child{margin-top:0}
+.grp-h.late{color:var(--bad)}
+.tl .ti{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.tl .ti:last-child{border-bottom:0}
+.tl .ti-sub{grid-column:1}
+
+/* Key Points: li scrive Paolo dalla pagina */
+.kps{list-style:none;margin:0;padding:0}
+.kps li{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.35}
+.kps li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--mark);transform:translateY(-2px)}
+.kps li:last-child{border-bottom:0}
+.kps .x{border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:6px}
+.kps .x:hover{color:var(--bad);background:var(--bad-bg)}
+.kp-add{display:flex;gap:8px;margin-top:12px}
+.kp-add input{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);flex:1;min-width:0}
+.kp-nota{font-size:13px;color:var(--ink-3);margin-top:8px}
+.kp-link{border:0;background:none;padding:0;color:var(--accent);font-size:13.5px;cursor:pointer;text-decoration:underline;margin-top:10px}
+.kp-key{margin-top:10px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--ink-2)}
+.kp-key ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+
+/* Campagne */
+.pf-h{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:600;margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
+.cc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.cc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.cc-h b{font-size:17px;font-weight:600;line-height:1.25;min-width:0}
+.cc.ferma{opacity:.6}
+.cc .kpis .v{font-size:21px}
+.cc-f{font-size:13px;color:var(--ink-3);margin-top:8px}
+
+/* Variazioni per campagna */
+.mese-h{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600;margin:16px 0 0;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.mese-h:first-child{margin-top:0}
+.chip .nn{font-size:12px;opacity:.65;margin-left:4px}
 .stato-dati{font-size:13px;color:var(--ink-3)}
 @media print{
   @page{size:A4;margin:12mm}
@@ -391,8 +469,19 @@ async function chiaveDati(){
   if(CHIAVE) return CHIAVE;
   const k = leggiChiave();
   if(!k) throw new ErroreChiave("manca");
-  CHIAVE = await crypto.subtle.importKey("raw", b64d(k), "AES-GCM", false, ["decrypt"]);
+  CHIAVE = await crypto.subtle.importKey("raw", b64d(k), "AES-GCM", false, ["encrypt","decrypt"]);
   return CHIAVE;
+}
+/* Stesso formato di strumenti/cifratura.py: iv di 12 byte, poi testo cifrato con il suo sigillo. */
+async function decifraByte(b){
+  const k = await chiaveDati();
+  try{ return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:b.slice(0,12)}, k, b.slice(12))); }
+  catch(e){ salvaChiave(""); CHIAVE = null; throw new ErroreChiave("cambiata"); }
+}
+async function cifraTesto(t){
+  const k = await chiaveDati(), iv = crypto.getRandomValues(new Uint8Array(12));
+  const c = new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM", iv}, k, new TextEncoder().encode(t)));
+  const out = new Uint8Array(12 + c.length); out.set(iv); out.set(c, 12); return out;
 }
 /* Password → chiave dati, con gli stessi parametri di strumenti/cifratura.py (PBKDF2-SHA256, AES-GCM). */
 async function apriConPassword(pw){
@@ -413,13 +502,11 @@ async function leggi(rel, tipo="json"){
     if(!r.ok) throw new Error("archivio dati: risposta "+r.status);
     testo = await r.text();
   } else {
-    const k = await chiaveDati();
+    await chiaveDati();
     const r = await fetch(url(rel+".cif"), {cache:"no-store"});
     if(r.status===404) return null;
     if(!r.ok) throw new Error("archivio dati: risposta "+r.status);
-    const b = new Uint8Array(await r.arrayBuffer());
-    try{ testo = new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:b.slice(0,12)}, k, b.slice(12))); }
-    catch(e){ salvaChiave(""); CHIAVE = null; throw new ErroreChiave("cambiata"); }
+    testo = await decifraByte(new Uint8Array(await r.arrayBuffer()));
   }
   return tipo==="json" ? JSON.parse(testo) : testo;
 }
@@ -467,19 +554,11 @@ const dm = iso=>iso.slice(8,10)+"/"+iso.slice(5,7);
 const eur = (v,dec=0)=>v.toLocaleString("it-IT",{minimumFractionDigits:dec,maximumFractionDigits:dec});
 const css = n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const late = s=>s && s<OGGI;
-const fonte = t=>`<div class="fonte">Fonte: ${t}</div>`;
 const inArrivo = t=>`<div class="ph soon-box"><span>${t}</span><span class="soon">in arrivo</span></div>`;
 const nomeMese = k=>MESI_LUNGHI[+k.slice(5,7)-1];
 function dataLunga(iso){ const d=new Date(iso+"T12:00:00"); return `${GIORNI[d.getDay()]} ${d.getDate()} ${MESI_LUNGHI[d.getMonth()].toLowerCase()}`; }
 
-const FONTI = {
-  risultati:c=>`risultati/${c}.csv nell'archivio dati. Scrivono solo le automazioni, dalle piattaforme.`,
-  variazioni:"sezione B del tracker dell'attività, solo cose fatte. Scrivono le skill, dopo la tua approvazione della riga.",
-  passi:"archivio dei to-do, campo cliente. Arrivano da Telegram, riunioni riviste, tua richiesta.",
-  attesa:"archivio dei to-do, stato in attesa, con chi o cosa le sblocca.",
-  scheda:c=>`Clienti/${c}/scheda.yaml. Scrive Claude, solo su tua dettatura o approvazione.`,
-  spunti:c=>`Clienti/${c}/scheda.yaml. Solo tua dettatura, in sessione o da Telegram.`
-};
+/* Le fonti di ogni casella sono scritte in Sistema/cruscotto/CLAUDE.md, non in pagina (scelta di Paolo del 2026-11-25). */
 let toastT;
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{t.hidden=true;},2600); }
 
@@ -552,29 +631,8 @@ function fmtKpi(k, v){ if(v==null) return "n.d."; const dec = k.metrica==="conve
 function rigaVar(v){
   return `<div class="var"><div class="d">${dm(v.d)}</div><div class="c">${esc(v.c)}</div><div class="m">Motivo: ${esc(v.m)}</div>${v.link?`<div class="lk"><a href="${esc(v.link)}" target="_blank" rel="noopener">Dettagli</a></div>`:""}</div>`;
 }
-function variazioniHTML(list, all){
-  const visible = new Set(list.slice(0,5)), order = [];
-  list.forEach(v=>{ if(!order.includes(v.camp)) order.push(v.camp); });
-  let h = "";
-  order.forEach(camp=>{
-    const rows = list.filter(v=>v.camp===camp && (all||visible.has(v)));
-    if(!rows.length) return;
-    const tot = list.filter(v=>v.camp===camp).length;
-    h+=`<div class="camp"><div class="camp-h">${esc(camp)}<span>${tot} ${tot===1?"riga":"righe"}</span></div>${rows.map(rigaVar).join("")}</div>`;
-  });
-  if(list.length>5) h+=`<button class="more" data-toggle-var>${all?"Mostra solo le ultime 5":"Mostra tutte ("+list.length+")"}</button>`;
-  return h || `<div class="ph">Nessuna variazione registrata.</div>`;
-}
 const dueHTML = s=>s?`<span class="due ${late(s)?"late":""}">${late(s)?"scaduta ":""}${dm(s)}</span>`:"";
-function passiHTML(list){
-  if(!list.length) return `<div class="ph">Nessun prossimo passo.</div>`;
-  return `<ul class="steps">${list.map(p=>`<li><span class="tx">${esc(p.t)}${p.dc?' <span class="tag dc">da confermare</span>':""}</span>${dueHTML(p.s)}</li>`).join("")}</ul>`;
-}
 const giorni = dal=>{ const n = Math.round((new Date(OGGI+"T12:00:00")-new Date(dal+"T12:00:00"))/864e5); return n<=0?"da oggi":n===1?"1 giorno":n+" giorni"; };
-function attesaHTML(list){
-  if(!list.length) return `<div class="ph">Niente in attesa.</div>`;
-  return `<ul class="att">${list.map(v=>`<li><span>${esc(v.t)}</span><span class="gg">${v.dal?giorni(v.dal):""}</span>${v.a?`<span class="wh">aspetta: <b>${esc(v.a)}</b></span>`:""}</li>`).join("")}</ul>`;
-}
 
 /* ================= SCHERMATE ================= */
 function viewChiave(motivo){
@@ -603,9 +661,7 @@ function viewClienti(){
         <div><div class="name">${esc(c.nome)}${att}</div><div class="meta" id="meta-${c.id}">${c.risultati?"":"Risultati in arrivo"}</div></div>
         <div id="val-${c.id}">${c.risultati?"":`<span class="soon">in arrivo</span>`}</div>
         <div class="spark" id="sp-${c.id}"></div></a></li>`;
-    }).join("")}</ul>
-    ${fonte("la casella Risultati di ogni cliente. Il numero è il KPI principale scritto nella sua scheda, ultimo mese chiuso.")}
-  </section>
+    }).join("")}</ul>  </section>
   </div>`;
 }
 async function initClienti(){
@@ -626,12 +682,29 @@ async function initClienti(){
   return draw;
 }
 
-function viewCliente(c){
-  const S = c.scheda||{}, kpi = S.kpi||[], var_ = c.variazioni||{stato:"in-arrivo"};
-  const ris = c.risultati && kpi.length;
+/* Schede interne del cliente: #c/<cliente>/<scheda>. La prima è quella che si apre. */
+const CTABS = [
+  ["risultati","Risultati",'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
+  ["campagne","Campagne",'<path d="M3 11v3l12 5V6L3 11zM15 9h3a3 3 0 0 1 0 6h-3"/>'],
+  ["variazioni","Variazioni",'<path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/>'],
+  ["todo","To-do",'<path d="M4 6l2 2 3-3M4 13l2 2 3-3M12 7h9M12 14h9M12 20h9M4 20h3"/>'],
+  ["scheda","Scheda",'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h6M7 13h10M7 17h8"/>'],
+  ["rinnovo","Rinnovo",'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>']
+];
+
+function viewCliente(c, tab){
+  const n = {todo:(c.passi||[]).length+(c.attesa||[]).length};
+  const nav = `<nav class="ctabs" aria-label="Schede del cliente">${CTABS.map(([k,l,ic])=>`<a href="#c/${c.id}/${k}"${k===tab?' aria-current="page"':""}><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg><span>${l}${n[k]?`<span class="nn">${n[k]}</span>`:""}</span></a>`).join("")}</nav>`;
+  const P = {risultati:pannelloRisultati, campagne:pannelloCampagne, variazioni:pannelloVariazioni, todo:pannelloTodo, scheda:pannelloScheda, rinnovo:pannelloRinnovo}[tab];
   return `<div class="view">
   <div><a class="back" href="#clienti">&#8249; Clienti</a><h1>${esc(c.nome)}</h1>${c.sotto?`<div class="sub">${esc(c.sotto)}</div>`:""}</div>
+  <div class="cli-wrap">${nav}<div class="cpanel">${P(c)}</div></div>
+  </div>`;
+}
 
+function pannelloRisultati(c){
+  const kpi = (c.scheda||{}).kpi||[], ris = c.risultati && kpi.length;
+  return `<div class="duo">
   <section class="box" id="ris">
     <h2>Risultati</h2>
     ${ris ? `<div class="kpis" id="kpis"></div>
@@ -641,50 +714,263 @@ function viewCliente(c){
     <div class="chart" id="chartC"></div>
     <div class="legend-mark"><i>3</i> variazioni nel mese: tocca il segno</div>
     <div id="pop"></div>` : inArrivo("I numeri arriveranno da soli dalle piattaforme.")}
-    ${fonte(FONTI.risultati(c.id))}
   </section>
+  <section class="box kp">
+    <h2>Key Points</h2>
+    <div id="kp-body"><div class="ph">Carico...</div></div>  </section>
+  </div>`;
+}
 
+/* ---------- Key Points: appunti/<cliente>.json nell'archivio dati, cifrato. Li scrive solo Paolo, da qui.
+   Per scrivere serve una chiave GitHub fine-grained limitata a cruscotto-lavoro-dati (Contents: lettura
+   e scrittura), creata da Paolo e tenuta solo sul dispositivo. In anteprima locale restano nel browser. */
+const GH_LS = "cruscotto-lavoro-gh", GH_REPO = "PaoloB91/cruscotto-lavoro-dati";
+const KP_MAX = 5, KP_TETTO = 100;
+class ErroreGh extends Error {}
+function leggiGh(){ try{ return localStorage.getItem(GH_LS)||""; }catch(e){ return ""; } }
+function salvaGh(v){ try{ v ? localStorage.setItem(GH_LS, v) : localStorage.removeItem(GH_LS); }catch(e){} }
+function ghApi(path, opt={}, tok=leggiGh()){
+  return fetch(`https://api.github.com/repos/${GH_REPO}${path}`, {...opt, cache:"no-store",
+    headers:{Authorization:`Bearer ${tok}`, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28", ...(opt.headers||{})}});
+}
+async function leggiAppunti(id){
+  const rel = `appunti/${id}.json`;
+  if(!CIFRATO){ try{ return {punti:JSON.parse(localStorage.getItem("cruscotto-anteprima-"+rel)||"[]")}; }catch(e){ return {punti:[]}; } }
+  if(!leggiGh()) return (await leggi(rel)) || {punti:[]};
+  /* Con la chiave si legge dall'API: sempre fresco, senza il minuto di ritardo delle Pages. */
+  const r = await ghApi(`/contents/${rel}.cif?ref=main`);
+  if(r.status===404) return {punti:[], sha:null};
+  if(r.status===401 || r.status===403) throw new ErroreGh("chiave");
+  if(!r.ok) throw new Error("GitHub: risposta "+r.status);
+  const j = await r.json();
+  return {...JSON.parse(await decifraByte(b64d(j.content.replace(/\s/g,"")))), sha:j.sha};
+}
+async function scriviAppunti(id, cambia){
+  const rel = `appunti/${id}.json`;
+  if(!CIFRATO){
+    const punti = cambia((await leggiAppunti(id)).punti);
+    try{ localStorage.setItem("cruscotto-anteprima-"+rel, JSON.stringify(punti)); }catch(e){}
+    return {punti};
+  }
+  for(let tentativo=0; tentativo<3; tentativo++){
+    const cur = await leggiAppunti(id), punti = cambia(cur.punti||[]);
+    const corpo = {message:`Key Points ${id}`, branch:"main", content:b64e(await cifraTesto(JSON.stringify({punti}, null, 1)+"\n"))};
+    if(cur.sha) corpo.sha = cur.sha;
+    const r = await ghApi(`/contents/${rel}.cif`, {method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(corpo)});
+    if(r.ok) return {punti};
+    if(r.status===401 || r.status===403) throw new ErroreGh("chiave");
+    if(r.status!==409 && r.status!==422) throw new Error("GitHub: risposta "+r.status);
+    /* 409/422: il file è cambiato nel frattempo (altro dispositivo): si rilegge e si riapplica. */
+  }
+  throw new Error("salvataggio non riuscito, riprova");
+}
+const chiaveGhHTML = ()=>`<form class="kp-key" data-kp-chiave>
+  <span>Serve una chiave di GitHub, una volta per dispositivo. La crei tu:</span>
+  <ol><li>apri <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub, nuova chiave</a></li>
+    <li>accesso solo all'archivio <b>cruscotto-lavoro-dati</b></li>
+    <li>permesso Contents: lettura e scrittura</li></ol>
+  <div class="kp-add"><input type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla la chiave" aria-label="Chiave di GitHub"><button class="sbtn pri">Collega</button></div>
+</form>`;
+function kpHTML(st){
+  const punti = st.punti||[], scrive = !CIFRATO || !!leggiGh();
+  let h = punti.length
+    ? `<ul class="kps">${punti.map(p=>`<li><span>${esc(p.t)}</span>${scrive?`<button class="x" data-kp-via="${esc(p.k)}" aria-label="Togli questo punto">&times;</button>`:"<span></span>"}</li>`).join("")}</ul>`
+    : `<div class="ph">Nessun punto${scrive?": scrivi qui sotto le cose da avere sott'occhio.":"."}</div>`;
+  if(scrive){
+    h += punti.length<KP_MAX
+      ? `<form class="kp-add" data-kp-form><input maxlength="${KP_TETTO}" placeholder="Aggiungi un punto" aria-label="Nuovo punto" enterkeyhint="done"><button class="sbtn pri">Aggiungi</button></form>`
+      : `<div class="kp-nota">Al massimo ${KP_MAX} punti: togline uno per aggiungerne un altro.</div>`;
+    if(!CIFRATO) h += `<div class="kp-nota">Anteprima sul Mac: i punti restano in questo browser.</div>`;
+  } else h += `<button class="kp-link" data-kp-collega>Scrivere da questo dispositivo</button>`;
+  return h;
+}
+async function initKeyPoints(c){
+  const root = $("#app"), body = $("#kp-body");
+  let st = {punti:[]};
+  const mostra = ()=>{ if(body.isConnected) body.innerHTML = kpHTML(st); };
+  const errore = err=>{
+    if(err instanceof ErroreGh){ salvaGh(""); mostra(); toast("La chiave di GitHub non vale più: ricollega il dispositivo"); }
+    else if(err instanceof ErroreChiave){ route(); }
+    else toast(String(err.message||err));
+  };
+  try{ st = await leggiAppunti(c.id); mostra(); }
+  catch(err){ if(err instanceof ErroreGh){ salvaGh(""); st = await leggiAppunti(c.id).catch(()=>st); mostra(); } else body.innerHTML = `<div class="ph">${esc(err.message||err)}</div>`; }
+  root.addEventListener("submit", async e=>{
+    const f = e.target.closest("form"); if(!f || !body.contains(f)) return;
+    e.preventDefault();
+    const inp = f.querySelector("input"), bt = f.querySelector("button"), v = inp.value.trim();
+    if(!v) return;
+    bt.disabled = true;
+    if(f.matches("[data-kp-chiave]")){
+      const r = await ghApi("", {}, v).catch(()=>null);
+      if(!r || !r.ok){ bt.disabled = false; toast("Questa chiave non apre l'archivio cruscotto-lavoro-dati"); return; }
+      salvaGh(v); st = await leggiAppunti(c.id).catch(()=>st); mostra(); toast("Dispositivo collegato"); return;
+    }
+    try{ st = await scriviAppunti(c.id, p=>p.length>=KP_MAX ? p : [...p, {k:Date.now().toString(36), t:v.slice(0,KP_TETTO), d:OGGI}]); mostra(); body.querySelector("[data-kp-form] input")?.focus(); }
+    catch(err){ bt.disabled = false; errore(err); }
+  });
+  root.addEventListener("click", async e=>{
+    if(e.target.closest("[data-kp-collega]")){ e.target.closest("[data-kp-collega]").outerHTML = chiaveGhHTML(); body.querySelector("[data-kp-chiave] input").focus(); return; }
+    const x = e.target.closest("[data-kp-via]"); if(!x) return;
+    x.disabled = true;
+    try{ st = await scriviAppunti(c.id, p=>p.filter(q=>q.k!==x.dataset.kpVia)); mostra(); toast("Punto tolto"); }
+    catch(err){ x.disabled = false; errore(err); }
+  });
+}
+
+/* Campagne: dalle righe per campagna di risultati/<cliente>.csv. Attiva = ha speso negli ultimi 7 giorni. */
+const PERIODI = [["30","Ultimi 30 giorni"],["mese","Questo mese"],["prima","Mese scorso"]];
+function pannelloCampagne(c){
+  if(!c.risultati) return `<section class="box"><h2>Campagne</h2>${inArrivo("I numeri delle campagne arriveranno da soli dalle piattaforme.")}</section>`;
+  return `<div class="chips" role="group" aria-label="Periodo">${PERIODI.map(([k,l],i)=>`<button class="chip" data-per="${k}" aria-pressed="${i===0}">${l}</button>`).join("")}</div>
+  <div id="camp-body" class="cpanel"></div>`;
+}
+const piuGiorni = (iso,n)=>{ const d=new Date(iso+"T12:00:00"); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+function campagneHTML(c, per){
+  const righe = (D.risultati[c.id]||[]).filter(r=>r.c);
+  if(!righe.length) return `<section class="box">${inArrivo("Per questo cliente non ci sono ancora numeri per campagna.")}</section>`;
+  const fino = ultimoGiorno(righe);
+  let da, a = fino;
+  if(per==="mese") da = fino.slice(0,7)+"-01";
+  else if(per==="prima"){ const p = new Date(fino.slice(0,7)+"-01T12:00:00"); p.setMonth(p.getMonth()-1); da = p.toISOString().slice(0,7)+"-01"; a = piuGiorni(fino.slice(0,7)+"-01",-1); }
+  else da = piuGiorni(fino,-29);
+  const kpi = (c.scheda||{}).kpi||[];
+  const camp = {};
+  righe.forEach(r=>{ (camp[r.c] ||= []).push(r); });
+  const schede = Object.entries(camp).map(([nome, rr])=>{
+    const met = [...new Set(rr.map(r=>r.m))].find(m=>!["spesa","clic","impression"].includes(m));
+    const somma = m=>rr.filter(r=>r.m===m && r.g>=da && r.g<=a).reduce((s,r)=>s+r.v,0);
+    const ultimaSpesa = rr.filter(r=>r.m==="spesa" && r.v>0).reduce((x,r)=>r.g>x?r.g:x,"");
+    const attiva = ultimaSpesa && ultimaSpesa>=piuGiorni(fino,-6);
+    const k = kpi.find(x=>x.metrica===met), nomeRis = k ? k.nome : (met||"Risultati").replace(/^./,s=>s.toUpperCase());
+    const sp = somma("spesa"), ris = met ? somma(met) : 0;
+    return {nome, attiva, ultimaSpesa, sp, ris, nomeRis, cpr: ris>0 ? sp/ris : null};
+  }).sort((x,y)=>(y.attiva-x.attiva) || y.sp-x.sp);
+  const card = s=>`<article class="cc${s.attiva?"":" ferma"}">
+    <div class="cc-h"><b>${esc(s.nome)}</b><span class="pill ${s.attiva?"p-ok":"p-wait"}">${s.attiva?"attiva":"ferma"}</span></div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Spesa</div><div class="v num">${eur(s.sp)} €</div></div>
+      <div class="kpi"><div class="l">${esc(s.nomeRis)}</div><div class="v num">${eur(s.ris, s.ris%1?1:0)}</div></div>
+      <div class="kpi"><div class="l">Costo per risultato</div><div class="v num">${s.cpr==null?"nessuno":eur(s.cpr, s.cpr<10?2:0)+" €"}</div></div>
+    </div>
+    ${s.attiva?"":`<div class="cc-f">Ultima spesa il ${dm(s.ultimaSpesa)}</div>`}
+  </article>`;
+  const att = schede.filter(s=>s.attiva), fer = schede.filter(s=>!s.attiva);
+  return `<section class="box"><div class="sec-h" style="margin-bottom:12px"><h2 class="pf-h">${esc(c.piattaforma||"Campagne")}</h2><span class="stato-dati">dal ${dm(da)} al ${dm(a)}</span></div>
+    <div class="cards">${att.map(card).join("") || `<div class="ph">Nessuna campagna attiva.</div>`}</div>
+    ${fer.length?`<div class="lab" style="margin:16px 0 8px">Ferme</div><div class="cards">${fer.map(card).join("")}</div>`:""}
+  </section>`;
+}
+
+/* Variazioni: scegli la campagna, compaiono le sue righe, dalla più recente, divise per mese. */
+function pannelloVariazioni(c){
+  const v = c.variazioni||{stato:"in-arrivo"};
+  if(v.stato!=="ok") return `<section class="box"><h2>Variazioni</h2>${inArrivo("Il registro di questo cliente non è ancora nel formato nuovo.")}</section>`;
+  const ordine = []; v.righe.forEach(r=>{ if(!ordine.includes(r.camp)) ordine.push(r.camp); });
+  return `<div class="chips" role="group" aria-label="Campagna">${ordine.map((k,i)=>`<button class="chip" data-camp="${esc(k)}" aria-pressed="${i===0}">${esc(k)}<span class="nn">${v.righe.filter(r=>r.camp===k).length}</span></button>`).join("")}</div>
+  <section class="box"><div id="var-body">${variazioniCampagna(v.righe, ordine[0])}</div></section>`;
+}
+function variazioniCampagna(righe, camp){
+  let h = "", mese = "";
+  righe.filter(r=>r.camp===camp).forEach(r=>{
+    const m = r.d.slice(0,7);
+    if(m!==mese){ mese = m; h += `<div class="mese-h">${nomeMese(m)} ${m.slice(0,4)}</div>`; }
+    h += rigaVar(r);
+  });
+  return h || `<div class="ph">Nessuna variazione registrata.</div>`;
+}
+
+/* To-do: il nome del cliente in testa alla voce ("Ceabis Google Ads: ...") diventa un'etichetta corta,
+   il testo si ferma a poche righe e si apre toccandolo. Il testo della voce non si riscrive. */
+function separa(t, nome){
+  const m = String(t||"").match(/^([^:]{2,45}):\s*([\s\S]+)$/);
+  if(m && m[1].toLowerCase().startsWith(nome.toLowerCase())){
+    const tag = m[1].slice(nome.length).replace(/^[\s,-]+/,"").trim();
+    return {tag, t:m[2].charAt(0).toUpperCase()+m[2].slice(1)};
+  }
+  return {tag:"", t:String(t||"")};
+}
+function quando(s){
+  if(!s) return "";
+  if(s<OGGI) return `<span class="qd late">scaduta ${dm(s)}</span>`;
+  if(s===OGGI) return `<span class="qd oggi">oggi</span>`;
+  return `<span class="qd">${dm(s)}</span>`;
+}
+function voceTodo(v, nome, att){
+  const {tag, t} = separa(v.t, nome), lt = !att && late(v.s);
+  const etich = `${tag?`<span class="ti-tag">${esc(tag)}</span>`:""}${v.dc?`<span class="tag dc">da confermare</span>`:""}`;
+  const aspetta = att && v.a ? `<div class="ti-a">aspetta <b>${esc(v.a)}</b>${v.dal?` · ${giorni(v.dal)}`:""}</div>` : "";
+  const data = att ? "" : quando(v.s);
+  return `<li class="ti${lt?" late":""}" data-apri tabindex="0"><div class="ti-t">${esc(t)}</div>${data}${etich||aspetta?`<div class="ti-sub">${etich}${aspetta}</div>`:""}</li>`;
+}
+function listaTodo(list, nome, att){
+  if(!list.length) return `<div class="ph">${att?"Niente in attesa.":"Niente da fare."}</div>`;
+  const ul = l=>`<ul class="tl">${l.map(v=>voceTodo(v,nome,att)).join("")}</ul>`;
+  if(att) return ul(list);
+  const g = {"Scadute":[], "Entro 7 giorni":[], "Più avanti":[], "Senza data":[]}, fra7 = piuGiorni(OGGI,7);
+  list.forEach(v=>g[!v.s?"Senza data":v.s<OGGI?"Scadute":v.s<=fra7?"Entro 7 giorni":"Più avanti"].push(v));
+  return Object.entries(g).filter(([,l])=>l.length).map(([k,l])=>`<div class="grp-h${k==="Scadute"?" late":""}">${k}<span>${l.length}</span></div>${ul(l)}`).join("");
+}
+function pannelloTodo(c){
+  const passi = c.passi||[], att = c.attesa||[];
+  return `<div class="duo pari">
   <section class="box">
-    <h2>Variazioni</h2>
-    <div id="var-body">${var_.stato==="ok" ? variazioniHTML(var_.righe,false) : inArrivo("Il registro di questo cliente non è ancora nel formato nuovo.")}</div>
-    ${fonte(FONTI.variazioni)}
+    <div class="sec-h" style="margin-bottom:12px"><h2 style="margin:0">Da fare</h2><span class="stato-dati">${passi.length}</span></div>
+    ${listaTodo(passi, c.nome, false)}
   </section>
-
   <section class="box">
-    <h2>Prossimi passi</h2>
-    ${passiHTML(c.passi||[])}
-    ${fonte(FONTI.passi)}
+    <div class="sec-h" style="margin-bottom:12px"><h2 style="margin:0">In attesa</h2><span class="stato-dati">${att.length}</span></div>
+    ${listaTodo(att, c.nome, true)}
   </section>
+  </div>`;
+}
 
-  <section class="box">
-    <h2>In attesa</h2>
-    ${attesaHTML(c.attesa||[])}
-    ${fonte(FONTI.attesa)}
-  </section>
-
-  <details class="box"><summary><h2>Scheda</h2></summary><div class="in">
+function pannelloScheda(c){
+  const S = c.scheda||{}, kpi = S.kpi||[];
+  return `<section class="box"><h2>Scheda cliente</h2>
     ${S.stato==="ok" ? `
     <div class="sk"><h3>KPI</h3>${kpi.length?`<ul>${kpi.map(k=>`<li>${esc(k.nome)}${k.nota?": "+esc(k.nota):""}</li>`).join("")}</ul>`:`<div class="ph">Vuota. Si riempie quando la detti.</div>`}</div>
     <div class="sk"><h3>Obiettivi e accordi</h3>${S.obiettivi.length?`<ul>${S.obiettivi.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<div class="ph">Vuota. Si riempie quando la detti.</div>`}</div>
     <div class="sk"><h3>Moodboard</h3>${S.moodboard.length?`<ul>${S.moodboard.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<div class="ph">Vuota. Si riempie quando la detti.</div>`}</div>`
-    : inArrivo("La scheda di questo cliente non c'è ancora.")}
-    ${fonte(FONTI.scheda(c.id))}
-  </div></details>
-
-  <details class="box"><summary><h2>Spunti rinnovo</h2></summary><div class="in">
-    ${(S.spunti||[]).length ? `<ul class="steps">${S.spunti.map(x=>`<li><span>${esc(typeof x==="string"?x:(x.t||""))}</span>${x.d?`<span class="due">${dm(x.d)}</span>`:""}</li>`).join("")}</ul>` : `<div class="ph">Nessuno spunto. Dettalo in sessione o da Telegram con il nome del cliente.</div>`}
-    ${fonte(FONTI.spunti(c.id))}
-  </div></details>
-  </div>`;
+    : inArrivo("La scheda di questo cliente non c'è ancora.")}  </section>`;
 }
 
-function initCliente(c){
+function pannelloRinnovo(c){
+  const S = c.scheda||{};
+  return `<section class="box"><h2>Rinnovo contratto</h2>
+    ${(S.spunti||[]).length ? `<ul class="steps">${S.spunti.map(x=>`<li><span>${esc(typeof x==="string"?x:(x.t||""))}</span>${x.d?`<span class="due">${dm(x.d)}</span>`:""}</li>`).join("")}</ul>` : `<div class="ph">Nessuno spunto. Dettalo in sessione o da Telegram con il nome del cliente.</div>`}  </section>`;
+}
+
+function initCliente(c, tab){
   const root = $("#app");
-  let allVar = false;
-  root.addEventListener("click", e=>{
-    if(!e.target.closest("[data-toggle-var]")) return;
-    allVar = !allVar; $("#var-body").innerHTML = variazioniHTML(c.variazioni.righe, allVar);
-  });
+  if(tab==="campagne"){
+    if(!c.risultati) return null;
+    let per = "30";
+    const draw = ()=>{ $("#camp-body").innerHTML = campagneHTML(c, per); };
+    root.addEventListener("click", e=>{
+      const b = e.target.closest("[data-per]"); if(!b) return;
+      per = b.dataset.per; root.querySelectorAll("[data-per]").forEach(x=>x.setAttribute("aria-pressed", x===b)); draw();
+    });
+    draw(); return null;
+  }
+  if(tab==="variazioni"){
+    root.addEventListener("click", e=>{
+      const b = e.target.closest("[data-camp]"); if(!b) return;
+      root.querySelectorAll("[data-camp]").forEach(x=>x.setAttribute("aria-pressed", x===b));
+      $("#var-body").innerHTML = variazioniCampagna(c.variazioni.righe, b.dataset.camp);
+    });
+    return null;
+  }
+  if(tab==="todo"){
+    const apri = el=>el.classList.toggle("open");
+    root.addEventListener("click", e=>{
+      const v = e.target.closest("[data-apri]"); if(v) apri(v);
+    });
+    root.addEventListener("keydown", e=>{ const v = e.target.closest?.("[data-apri]"); if(v && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); apri(v); } });
+    return null;
+  }
+  if(tab!=="risultati") return null;
+  initKeyPoints(c);
   const kpi = (c.scheda||{}).kpi||[];
   if(!(c.risultati && kpi.length)) return null;
   const righe = D.risultati[c.id]||[];
@@ -709,9 +995,12 @@ function initCliente(c){
   };
   const showPop = i=>{
     const rows = vars.filter(v=>v.d.slice(0,7)===mesi[i]), shown = rows.slice(0,4);
-    $("#pop").innerHTML = `<div class="pop"><h3>${nomeMese(mesi[i])}: ${rows.length} ${rows.length===1?"variazione":"variazioni"}</h3>${shown.map(rigaVar).join("")}${rows.length>4?`<button class="more" data-allvar>Le altre ${rows.length-4} in Variazioni</button>`:""}</div>`;
+    $("#pop").innerHTML = `<div class="pop"><h3>${nomeMese(mesi[i])}: ${rows.length} ${rows.length===1?"variazione":"variazioni"}</h3>${shown.map(rigaVar).join("")}${rows.length>4?`<a class="more" style="display:block;text-align:center;text-decoration:none;color:inherit" href="#c/${c.id}/variazioni">Le altre ${rows.length-4} in Variazioni</a>`:""}</div>`;
   };
   draw();
+  /* Ridisegna se la larghezza cambia dopo il primo disegno (font, barra di scorrimento, telefono ruotato). */
+  let larg = $("#chartC").clientWidth;
+  if(window.ResizeObserver) new ResizeObserver(()=>{ const el=$("#chartC"); if(el && el.clientWidth!==larg){ larg=el.clientWidth; draw(); } }).observe($("#chartC"));
   root.addEventListener("click", e=>{
     const mk = e.target.closest("[data-mark]");
     if(mk){ const i=+mk.dataset.mark; openMark = openMark===i?null:i; sel=i; draw(); if(openMark==null) $("#pop").innerHTML=""; else showPop(i); return; }
@@ -719,7 +1008,6 @@ function initCliente(c){
     if(b){ sel=+b.dataset.bar; draw(); return; }
     const ch = e.target.closest("[data-met]");
     if(ch){ met=+ch.dataset.met; root.querySelectorAll("[data-met]").forEach(x=>x.setAttribute("aria-pressed", x===ch)); draw(); return; }
-    if(e.target.closest("[data-allvar]")){ allVar=true; $("#var-body").innerHTML=variazioniHTML(vars,true); $("#var-body").scrollIntoView({behavior:"smooth",block:"start"}); }
   });
   return draw;
 }
@@ -746,9 +1034,7 @@ function viewOggi(){
   return `<div class="view">
   <div class="sec-h"><div><h1>Oggi</h1><div class="sub">To-do di lavoro con scadenza fino a oggi</div></div><button class="sbtn btn-print" data-stampa>Stampa</button></div>
   <section class="box">
-    ${listaOggiHTML(bl)}
-    ${fonte("archivio dei to-do, solo lavoro. Le voci in attesa non compaiono qui. Per ora si guardano soltanto: i pulsanti per sistemarle arrivano con la tappa 2.")}
-  </section>
+    ${listaOggiHTML(bl)}  </section>
   <div class="lab">La stampa, A4</div>
   <div class="sheet-wrap"><div class="sheet" id="sheet">${foglioHTML(bl)}</div></div>
   </div>`;
@@ -758,9 +1044,9 @@ function initOggi(){
   return null;
 }
 
-function viewVuota(titolo, sotto, testo, fonteTxt){
+function viewVuota(titolo, sotto, testo){
   return `<div class="view"><div><h1>${titolo}</h1><div class="sub">${sotto}</div></div>
-  <section class="box">${inArrivo(testo)}${fonte(fonteTxt)}</section></div>`;
+  <section class="box">${inArrivo(testo)}</section></div>`;
 }
 
 /* ---------- Come funziona ---------- */
@@ -885,7 +1171,7 @@ function initCome(){
   };
   show();
   root.addEventListener("click", e=>{
-    if(e.target.closest("[data-togli-chiave]")){ salvaChiave(""); location.hash="#clienti"; location.reload(); return; }
+    if(e.target.closest("[data-togli-chiave]")){ salvaChiave(""); salvaGh(""); location.hash="#clienti"; location.reload(); return; }
     const b = e.target.closest("[data-caso]");
     if(b){
       ci = +b.dataset.caso; si = 0; auto = true;
@@ -926,6 +1212,7 @@ async function route(){
   clearTimeout(comeT);
   let key = (location.hash||"#clienti").slice(1);
   document.body.classList.toggle("stampa-oggi", key==="oggi");
+  document.body.classList.remove("largo");
   try{
     if(!D.indice){
       monta(`<div class="view"><div class="ph">Carico i dati...</div></div>`);
@@ -936,12 +1223,14 @@ async function route(){
       if(mio!==giro) return;
     }
     if(key.startsWith("c/")){
-      const id = key.slice(2);
+      let [id, tab] = key.slice(2).split("/");
+      if(!CTABS.some(t=>t[0]===tab)) tab = "risultati";
       segnaTab("clienti");
+      document.body.classList.add("largo");
       const c = await caricaCliente(id);
       if(mio!==giro) return;
       if(!c){ location.hash = "#clienti"; return; }
-      monta(viewCliente(c)); redraw = initCliente(c);
+      monta(viewCliente(c, tab)); redraw = initCliente(c, tab);
     } else if(key==="oggi"){ segnaTab("oggi"); monta(viewOggi()); redraw = initOggi(); }
     else if(key==="posta"){ segnaTab("posta"); monta(viewVuota("Posta","Lavoro","Il report della posta arriva qui con la tappa 4. Per ora resta sulla Torre del Mac.","foglio/posta.json, scritto dal triage della posta.")); redraw = null; }
     else if(key==="automazioni"){ segnaTab("automazioni"); monta(viewVuota("Automazioni","Cosa gira al posto tuo","Lo stato delle automazioni arriva qui con la tappa 4. Per ora resta sulla Torre del Mac.","registro-automazioni.jsonl. Ogni automazione scrive una riga a fine giro.")); redraw = null; }
