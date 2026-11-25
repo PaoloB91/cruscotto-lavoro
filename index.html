@@ -371,11 +371,27 @@ body.largo main,body.largo .top-in{max-width:1120px}
 
 /* Key Points: li scrive Paolo dalla pagina */
 .kps{list-style:none;margin:0;padding:0}
-.kps li{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.35}
+.kps li{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.4}
 .kps li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--mark);transform:translateY(-2px)}
 .kps li:last-child{border-bottom:0}
-.kps .x{border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1;cursor:pointer;padding:2px 6px;border-radius:6px}
-.kps .x:hover{color:var(--bad);background:var(--bad-bg)}
+.kps li.ed{display:block}
+.kps li.ed::before{display:none}
+.kp-t{overflow-wrap:anywhere}
+.kp-t[data-kp-mod]{cursor:text}
+.kp-t b{font-weight:700;color:var(--ink)}
+.kp-az{display:flex;gap:2px;align-items:center}
+.kps .x{border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1;cursor:pointer;padding:3px 6px;border-radius:6px;display:inline-flex;align-items:center}
+.kps .x:hover{color:var(--ink);background:var(--sunk)}
+.kps .x[data-kp-via]:hover{color:var(--bad);background:var(--bad-bg)}
+.kp-ed{border:1px solid var(--accent);border-radius:8px;background:var(--surface);margin-top:10px}
+.kps .kp-ed{margin-top:0}
+.kp-area{min-height:72px;padding:10px 12px;font-size:16px;line-height:1.4;outline:none;overflow-wrap:anywhere;color:var(--ink)}
+.kp-area:empty::before{content:attr(data-ph);color:var(--ink-3)}
+.kp-area b,.kp-area strong{font-weight:700}
+.kp-bar{display:flex;align-items:center;gap:8px;padding:7px 8px;border-top:1px solid var(--line)}
+.kp-bar span{flex:1}
+.kp-b{width:36px;height:32px;border:1px solid var(--line);border-radius:6px;background:var(--sunk);color:var(--ink);font-size:15px;cursor:pointer}
+.kp-nuovo{margin-top:10px;width:100%;border:1px dashed var(--line);background:none;color:var(--accent);border-radius:8px;padding:10px 12px;font:inherit;font-size:15px;cursor:pointer;text-align:left}
 .kp-add{display:flex;gap:8px;margin-top:12px}
 .kp-add input{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);flex:1;min-width:0}
 .kp-nota{font-size:13px;color:var(--ink-3);margin-top:8px}
@@ -727,7 +743,7 @@ function pannelloRisultati(c){
    la chiave dati, e ogni dispositivo aperto con la password la prende da lì. In anteprima locale i punti
    restano nel browser. */
 const GH_LS = "cruscotto-lavoro-gh", GH_REPO = "PaoloB91/cruscotto-lavoro-dati", GH_FILE = "scrittura.json";
-const KP_MAX = 5, KP_TETTO = 100;
+const KP_MAX = 5, KP_TETTO = 600;
 class ErroreGh extends Error {}
 let ghScaduta = false;
 function leggiGh(){ try{ return localStorage.getItem(GH_LS)||""; }catch(e){ return ""; } }
@@ -785,16 +801,37 @@ const chiaveGhHTML = ()=>`<form class="kp-key" data-kp-chiave>
     <li>Permissions, Contents: <b>Read and write</b>, poi Generate token</li></ol>
   <div class="kp-add"><input type="text" name="gh-token" autocomplete="off" data-1p-ignore data-lpignore="true" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Incolla qui la chiave" aria-label="Chiave di GitHub"><button class="sbtn pri">Attiva</button></div>
 </form>`;
+/* Testo dei punti: righe a capo e **grassetto**. Si salva come testo semplice, si mostra con esc() + <b>/<br>. */
+const kpTesto = t=>esc(t).replace(/\*\*([\s\S]+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+function daEditor(el){
+  let out = "";
+  const walk = (n, b)=>{ for(const c of n.childNodes){
+    if(c.nodeType===3){ out += c.textContent.replace(/ /g," "); continue; }
+    if(c.nodeType!==1) continue;
+    if(c.nodeName==="BR"){ out += "\n"; continue; }
+    const blocco = /^(DIV|P|LI)$/.test(c.nodeName), gr = /^(B|STRONG)$/.test(c.nodeName) || parseInt(c.style?.fontWeight)>=600 || c.style?.fontWeight==="bold";
+    if(blocco && out && !out.endsWith("\n")) out += "\n";
+    if(gr && !b){
+      const prima = out; out = ""; walk(c, true);
+      const m = out.match(/^(\s*)([\s\S]*?)(\s*)$/); out = prima + (m[2] ? `${m[1]}**${m[2]}**${m[3]}` : out);
+    } else walk(c, b||gr);
+  } };
+  walk(el, false);
+  return out.replace(/\*{4}/g,"").replace(/\n{3,}/g,"\n\n").trim();
+}
+const kpEditor = (t, k="")=>`<div class="kp-ed" data-kp-ed="${esc(k)}"><div class="kp-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Testo del punto" data-ph="Scrivi il punto">${kpTesto(t)}</div>
+  <div class="kp-bar"><button type="button" class="kp-b" data-kp-bold aria-label="Grassetto"><b>B</b></button><span></span><button type="button" class="sbtn" data-kp-annulla>Annulla</button><button type="button" class="sbtn pri" data-kp-salva>Salva</button></div></div>`;
+const MATITA = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4z"/></svg>`;
 function kpHTML(st){
   const punti = st.punti||[], scrive = !CIFRATO || !!leggiGh();
   const attiva = `<button class="kp-link" data-kp-collega>${ghScaduta?"Chiave di GitHub scaduta: rinnovala":"Attiva la scrittura (una volta sola)"}</button>`;
   if(st.nonLetti && !punti.length) return `<div class="ph">Punti non letti: GitHub non risponde. Ricarica fra un minuto.</div>` + (scrive ? "" : attiva);
   let h = punti.length
-    ? `<ul class="kps">${punti.map(p=>`<li><span>${esc(p.t)}</span>${scrive?`<button class="x" data-kp-via="${esc(p.k)}" aria-label="Togli questo punto">&times;</button>`:"<span></span>"}</li>`).join("")}</ul>`
-    : `<div class="ph">Nessun punto${scrive?": scrivi qui sotto le cose da avere sott'occhio.":"."}</div>`;
+    ? `<ul class="kps">${punti.map(p=>`<li data-k="${esc(p.k)}"><div class="kp-t"${scrive?` data-kp-mod tabindex="0"`:""}>${kpTesto(p.t)}</div>${scrive?`<span class="kp-az"><button class="x" data-kp-mod aria-label="Modifica questo punto">${MATITA}</button><button class="x" data-kp-via="${esc(p.k)}" aria-label="Togli questo punto">&times;</button></span>`:"<span></span>"}</li>`).join("")}</ul>`
+    : `<div class="ph">Nessun punto.</div>`;
   if(scrive){
     h += punti.length<KP_MAX
-      ? `<form class="kp-add" data-kp-form><input maxlength="${KP_TETTO}" placeholder="Aggiungi un punto" aria-label="Nuovo punto" enterkeyhint="done"><button class="sbtn pri">Aggiungi</button></form>`
+      ? `<button class="kp-nuovo" data-kp-nuovo>+ Aggiungi un punto</button>`
       : `<div class="kp-nota">Al massimo ${KP_MAX} punti: togline uno per aggiungerne un altro.</div>`;
     if(!CIFRATO) h += `<div class="kp-nota">Anteprima sul Mac: i punti restano in questo browser.</div>`;
   } else h += attiva;
@@ -829,11 +866,47 @@ async function initKeyPoints(c){
       try{ await depositaGh(v); }catch(err){ bt.disabled = false; toast(String(err.message||err)); return; }
       salvaGh(v); ghScaduta = false; st = await leggiAppunti(c.id).catch(()=>st); mostra(); toast("Scrittura attiva, anche sugli altri dispositivi"); return;
     }
-    try{ st = await scriviAppunti(c.id, p=>p.length>=KP_MAX ? p : [...p, {k:Date.now().toString(36), t:v.slice(0,KP_TETTO), d:OGGI}]); mostra(); body.querySelector("[data-kp-form] input")?.focus(); }
-    catch(err){ bt.disabled = false; errore(err); }
+  });
+  /* Editor: un punto alla volta, si apre al posto del punto (o in fondo per uno nuovo). */
+  const apriEditor = (dove, t, k)=>{
+    mostra();
+    const el = k ? body.querySelector(`li[data-k="${CSS.escape(k)}"]`) : body.querySelector("[data-kp-nuovo]");
+    if(!el) return;
+    if(k){ el.classList.add("ed"); el.innerHTML = kpEditor(t, k); } else el.outerHTML = kpEditor("", "");
+    const a = body.querySelector(".kp-area"); a.focus();
+    const r = document.createRange(); r.selectNodeContents(a); r.collapse(false); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  };
+  const salva = async ed=>{
+    const k = ed.dataset.kpEd, t = daEditor(ed.querySelector(".kp-area")), bt = ed.querySelector("[data-kp-salva]");
+    if(!t){ toast("Il punto è vuoto"); return; }
+    if(t.length>KP_TETTO){ toast(`Troppo lungo: ${t.length} caratteri su ${KP_TETTO}`); return; }
+    bt.disabled = true;
+    try{
+      st = await scriviAppunti(c.id, p=> k ? p.map(q=>q.k===k ? {...q, t, d:OGGI} : q)
+                                           : (p.length>=KP_MAX ? p : [...p, {k:Date.now().toString(36), t, d:OGGI}]));
+      mostra(); toast(k ? "Punto modificato" : "Punto aggiunto");
+    } catch(err){ bt.disabled = false; errore(err); }
+  };
+  root.addEventListener("mousedown", e=>{ if(e.target.closest("[data-kp-bold]")) e.preventDefault(); });
+  root.addEventListener("keydown", e=>{
+    const ed = e.target.closest?.(".kp-ed");
+    if(ed){
+      if(e.key==="Enter" && (e.metaKey||e.ctrlKey)){ e.preventDefault(); salva(ed); }
+      else if(e.key==="Escape"){ e.preventDefault(); mostra(); }
+      return;
+    }
+    const m = e.target.closest?.(".kp-t[data-kp-mod]");
+    if(m && e.key==="Enter"){ e.preventDefault(); const k = m.closest("li").dataset.k; apriEditor(null, (st.punti.find(p=>p.k===k)||{}).t||"", k); }
   });
   root.addEventListener("click", async e=>{
+    if(!body.contains(e.target)) return;
     if(e.target.closest("[data-kp-collega]")){ e.target.closest("[data-kp-collega]").outerHTML = chiaveGhHTML(); body.querySelector("[data-kp-chiave] input").focus(); return; }
+    if(e.target.closest("[data-kp-bold]")){ document.execCommand("bold"); return; }
+    if(e.target.closest("[data-kp-annulla]")){ mostra(); return; }
+    const ed = e.target.closest("[data-kp-salva]")?.closest(".kp-ed"); if(ed){ salva(ed); return; }
+    if(e.target.closest("[data-kp-nuovo]")){ apriEditor(null, "", ""); return; }
+    const m = e.target.closest("[data-kp-mod]");
+    if(m && !e.target.closest("a")){ const k = m.closest("li").dataset.k; apriEditor(null, (st.punti.find(p=>p.k===k)||{}).t||"", k); return; }
     const x = e.target.closest("[data-kp-via]"); if(!x) return;
     x.disabled = true;
     try{ st = await scriviAppunti(c.id, p=>p.filter(q=>q.k!==x.dataset.kpVia)); mostra(); toast("Punto tolto"); }
