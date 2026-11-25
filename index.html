@@ -489,10 +489,11 @@ async function chiaveDati(){
   return CHIAVE;
 }
 /* Stesso formato di strumenti/cifratura.py: iv di 12 byte, poi testo cifrato con il suo sigillo. */
-async function decifraByte(b){
+/* esci=false: un file che non si decifra non scollega il dispositivo (Key Points), dà solo errore. */
+async function decifraByte(b, esci=true){
   const k = await chiaveDati();
   try{ return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:b.slice(0,12)}, k, b.slice(12))); }
-  catch(e){ salvaChiave(""); CHIAVE = null; throw new ErroreChiave("cambiata"); }
+  catch(e){ if(!esci) throw new Error("file illeggibile"); salvaChiave(""); CHIAVE = null; throw new ErroreChiave("cambiata"); }
 }
 async function cifraTesto(t){
   const k = await chiaveDati(), iv = crypto.getRandomValues(new Uint8Array(12));
@@ -772,8 +773,13 @@ async function leggiAppunti(id){
   if(r.status===404) return {punti:[], sha:null};
   if(r.status===401 || r.status===403) throw new ErroreGh("chiave");
   if(!r.ok) throw new Error("GitHub: risposta "+r.status);
-  const j = await r.json();
-  return {...JSON.parse(await decifraByte(b64d(j.content.replace(/\s/g,"")))), sha:j.sha};
+  const {sha} = await r.json();
+  /* /contents (sia "content" sia il formato raw) non è affidabile per i file cifrati: GitHub a volte li prende
+     per testo Latin-1 e li converte in UTF-8 (visto il 2026-11-25, 45 byte diventati 66). Il blob di git no. */
+  const rr = await ghApi(`/git/blobs/${sha}`);
+  if(!rr.ok) throw new Error("GitHub: risposta "+rr.status);
+  const blob = await rr.json();
+  return {...JSON.parse(await decifraByte(b64d(blob.content.replace(/\s/g,"")), false)), sha};
 }
 async function scriviAppunti(id, cambia){
   const rel = `appunti/${id}.json`;
