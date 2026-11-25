@@ -751,7 +751,7 @@ function pannelloRisultati(c){
    la chiave dati, e ogni dispositivo aperto con la password la prende da lì. In anteprima locale i punti
    restano nel browser. */
 const GH_LS = "cruscotto-lavoro-gh", GH_REPO = "PaoloB91/cruscotto-lavoro-dati", GH_FILE = "scrittura.json";
-const KP_MAX = 5, KP_TETTO = 800;
+const KP_MAX = 5;
 class ErroreGh extends Error {}
 let ghScaduta = false;
 function leggiGh(){ try{ return localStorage.getItem(GH_LS)||""; }catch(e){ return ""; } }
@@ -837,9 +837,8 @@ function kpParti(t){
   const i = t.indexOf("\n");
   return {tit:(i<0?t:t.slice(0,i)).replace(/\*\*/g,"").trim(), desc:i<0?"":t.slice(i+1).trim()};
 }
-const KP_TIT = 120;
 const kpEditor = (t, k="")=>{ const {tit, desc} = kpParti(t); return `<div class="kp-ed" data-kp-ed="${esc(k)}">
-  <input class="kp-tin" maxlength="${KP_TIT}" value="${esc(tit)}" placeholder="Titolo" aria-label="Titolo del punto" enterkeyhint="next" autocomplete="off">
+  <input class="kp-tin" value="${esc(tit)}" placeholder="Titolo" aria-label="Titolo del punto" enterkeyhint="next" autocomplete="off">
   <div class="kp-area" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Descrizione" data-ph="Descrizione (facoltativa)">${kpTesto(desc)}</div>
   <div class="kp-bar"><button type="button" class="kp-b" data-kp-bold aria-label="Grassetto"><b>B</b></button><span></span><button type="button" class="sbtn" data-kp-annulla>Annulla</button><button type="button" class="sbtn pri" data-kp-salva>Salva</button></div></div>`; };
 const MATITA = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4z"/></svg>`;
@@ -907,7 +906,6 @@ async function initKeyPoints(c){
     const tit = ed.querySelector(".kp-tin").value.replace(/\s+/g," ").trim(), desc = daEditor(ed.querySelector(".kp-area"));
     if(!tit){ toast("Manca il titolo"); ed.querySelector(".kp-tin").focus(); return; }
     const t = desc ? `${tit}\n${desc}` : tit;
-    if(t.length>KP_TETTO){ toast(`Troppo lungo: ${t.length} caratteri su ${KP_TETTO}`); return; }
     bt.disabled = true;
     try{
       st = await scriviAppunti(c.id, p=> k ? p.map(q=>q.k===k ? {...q, t, d:OGGI} : q)
