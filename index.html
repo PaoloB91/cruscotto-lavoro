@@ -202,6 +202,29 @@ details.box .in{padding:0 16px 16px}
 .p-wait{background:var(--sunk);color:var(--ink-2)}
 .p-warn{background:var(--warn-bg);color:var(--warn-ink)}
 .sec-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.giri{list-style:none;margin:0;padding:0}
+.giri li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.giri li:last-child{border-bottom:0}
+.giri .n{font-size:15.5px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.giri .o{font-family:var(--f-mono);font-size:13.5px;color:var(--ink-3);white-space:nowrap;text-align:right}
+.giri .m{grid-column:1/-1;font-size:14px;color:var(--ink-2);overflow-wrap:anywhere}
+.giri .lk{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px}
+.giri li.ko{background:var(--bad-bg);border:0;border-radius:8px;padding:10px 12px;margin:6px 0}
+.giri li.ko .n,.giri li.ko .ko-t{color:var(--bad)}
+.giri .ko-t{font-weight:700}
+.giri .nv{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:2px}
+.giri li.ko .nv{background:var(--bad)}
+.aut-t .s{overflow-wrap:anywhere}
+.aut-tipi{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:4px}
+.aut-tipi button{border:0;background:none;border-radius:7px;padding:9px 8px;font-size:15.5px;font-weight:600;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.aut-tipi button .num{font-weight:500;color:var(--ink-3);font-size:14px}
+.aut-tipi button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.aut-tipi button[aria-pressed="true"] .num{color:var(--accent)}
+.aut-tipi .seg{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.aut-tipi .seg.ko{background:var(--bad)}
+.aut-sotto{font-size:14px;color:var(--ink-3);margin:-6px 0 12px}
+nav.tabs a .seg{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:4px;vertical-align:top;flex:none}
+nav.tabs a .seg.ko{background:var(--bad)}
 
 /* Pulsanti piccoli, toast */
 .sbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:14.5px;font-weight:500;cursor:pointer;line-height:1.2}
@@ -1173,6 +1196,103 @@ function initOggi(){
   return null;
 }
 
+/* ---------- Automazioni ---------- */
+/* Giri degli ultimi 7 giorni (Hanno girato) e ultimo giro di ogni automazione (Tutte). Le date sono
+   quelle del Mac; "oggi", "ieri" e "non gira da troppo" si calcolano sull'ora del dispositivo. */
+const VISTO_LS = "cruscotto-lavoro-aut-visto";
+const DOVE = {mac:"Mac", cloud:"Google Cloud", routine:"Routine Claude", gmail:"Gmail"};
+function oraLocale(d=new Date()){ const p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+function giornoPrima(iso, n){ const d=new Date(iso+"T12:00:00"); d.setDate(d.getDate()-n); return oraLocale(d).slice(0,10); }
+function leggiVisto(){ try{ return localStorage.getItem(VISTO_LS)||""; }catch(e){ return ""; } }
+function salvaVisto(v){ try{ localStorage.setItem(VISTO_LS, v); }catch(e){} }
+/* Nuovi: i giri dopo l'ultima apertura della scheda su questo dispositivo; la prima volta, quelli di oggi. */
+function giriNuovi(){
+  if(!D.aut) return [];
+  const visto = leggiVisto() || oraLocale().slice(0,10);
+  return D.aut.giri.filter(g=>g.q > visto);
+}
+function segnoAutomazioni(){
+  const a = document.querySelector('nav.tabs a[data-tab="automazioni"]'); if(!a) return;
+  a.querySelector(".seg")?.remove();
+  const nuovi = giriNuovi(); if(!nuovi.length) return;
+  const ko = nuovi.some(g=>g.e==="errore");
+  a.insertAdjacentHTML("beforeend", `<span class="seg${ko?" ko":""}" aria-label="${ko?"Un'automazione è fallita":"Nuovi giri"}"></span>`);
+}
+async function caricaAutomazioni(){
+  try{ D.aut = await leggi("automazioni.json"); }catch(e){ D.aut = null; }
+  segnoAutomazioni();
+}
+function quandoGiro(q, conGiorno){
+  const oggi = oraLocale().slice(0,10), g = q.slice(0,10), ora = q.slice(11,16);
+  if(!conGiorno || g===oggi) return conGiorno ? `oggi ${ora}` : ora;
+  if(g===giornoPrima(oggi,1)) return `ieri ${ora}`;
+  const d = new Date(g+"T12:00:00");
+  return `${GIORNI[d.getDay()].slice(0,3)} ${d.getDate()}/${d.getMonth()+1} ${ora}`;
+}
+function ogniTesto(n){
+  if(!n) return "quando serve";
+  return {1:"ogni giorno",7:"ogni settimana",14:"ogni 2 settimane",31:"ogni mese"}[n] || `ogni ${n} giorni`;
+}
+function statoAut(g){
+  const giorni = (Date.now() - new Date(g.q).getTime()) / 864e5;
+  if(g.ogni && giorni > g.ogni + 2) return {k:"ferma", l:`Non gira da ${Math.floor(giorni)} giorni`, c:"p-warn", o:1};
+  if(g.e==="errore") return {k:"errore", l:"Fallita", c:"p-err", o:0};
+  return {k:"ok", l:"Regolare", c:"p-ok", o:2};
+}
+function rigaGiro(g, nuovo, conGiorno){
+  const ko = g.e==="errore";
+  const lk = (g.link||[]).map(x=>`<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)}</a>`).join("");
+  return `<li class="${ko?"ko":""}"><span class="n">${nuovo?'<span class="nv" title="Nuovo"></span>':""}${esc(g.a)}</span><span class="o">${quandoGiro(g.q, conGiorno)}</span>
+    ${g.m||ko?`<span class="m">${ko?'<span class="ko-t">Fallita.</span> ':""}${esc(g.m)}</span>`:""}${lk?`<span class="lk">${lk}</span>`:""}</li>`;
+}
+/* Due famiglie (scelta di Paolo del 2026-11-26): Produzione, che prepara il lavoro per i clienti, e
+   Interne (tracciamenti, report, manutenzione). La famiglia scelta si ricorda sul dispositivo. */
+const TIPI = [["produzione","Produzione"],["interna","Interne"]];
+const TIPO_LS = "cruscotto-lavoro-aut-tipo";
+let AUT_NUOVI = new Set();
+function leggiTipo(){ try{ const t = localStorage.getItem(TIPO_LS); return TIPI.some(x=>x[0]===t) ? t : "produzione"; }catch(e){ return "produzione"; } }
+function salvaTipo(t){ try{ localStorage.setItem(TIPO_LS, t); }catch(e){} }
+function viewAutomazioni(){
+  if(!D.aut) return viewVuota("Automazioni","Cosa gira al posto tuo","I dati delle automazioni non sono ancora arrivati.");
+  const tipo = leggiTipo();
+  const oggi = oraLocale().slice(0,10), ieri = giornoPrima(oggi,1);
+  const chiave = g=>g.a+"|"+g.q;
+  const seg = TIPI.map(([k,l])=>{
+    const giri = D.aut.giri.filter(g=>g.tipo===k);
+    const ko = D.aut.tutte.some(g=>g.tipo===k && statoAut(g).k!=="ok");
+    const nv = giri.some(g=>AUT_NUOVI.has(chiave(g)));
+    return `<button type="button" data-tipo="${k}" aria-pressed="${k===tipo}">${l} <span class="num">${giri.length}</span>${ko?'<span class="seg ko" aria-label="Qualcosa non va"></span>':nv?'<span class="seg" aria-label="Nuovi giri"></span>':""}</button>`;
+  }).join("");
+  const giri = D.aut.giri.filter(g=>g.tipo===tipo);
+  const gruppi = [["Oggi", g=>g.q.slice(0,10)===oggi, false], ["Ieri", g=>g.q.slice(0,10)===ieri, false],
+                  ["Prima", g=>g.q.slice(0,10)<ieri, true]];
+  const ord = (a,b)=> (a.e==="errore")!==(b.e==="errore") ? (a.e==="errore"?-1:1) : (a.q<b.q?1:a.q>b.q?-1:0);
+  const blocchi = gruppi.map(([t, f, cg])=>{
+    const l = giri.filter(f).sort(ord); if(!l.length) return "";
+    const ko = l.filter(g=>g.e==="errore").length;
+    return `<div class="cli-blk"><div class="cli-h">${t}<span>${l.length} ${l.length===1?"giro":"giri"}${ko?`, <b style="color:var(--bad)">${ko} ${ko===1?"fallito":"falliti"}</b>`:""}</span></div>
+      <ul class="giri">${l.map(g=>rigaGiro(g, AUT_NUOVI.has(chiave(g)), cg)).join("")}</ul></div>`;
+  }).join("");
+  const tutte = D.aut.tutte.filter(g=>g.tipo===tipo).map(g=>({g, s:statoAut(g)})).sort((a,b)=>a.s.o-b.s.o || a.g.a.localeCompare(b.g.a,"it"));
+  const sotto = tipo==="produzione" ? "Preparano il lavoro per i clienti" : "Tracciamenti, report e manutenzione";
+  return `<div class="view">
+  <div><h1>Automazioni</h1><div class="sub">Cosa ha girato al posto tuo negli ultimi 7 giorni</div></div>
+  <div class="aut-tipi" role="group" aria-label="Famiglia di automazioni">${seg}</div>
+  <section class="box"><h2>Hanno girato</h2><div class="aut-sotto">${sotto}</div>${blocchi || '<div class="ph">Nessun giro negli ultimi 7 giorni.</div>'}</section>
+  <section class="box"><h2>Tutte le automazioni</h2>${tutte.length ? `<ul class="rows aut-t">${tutte.map(({g,s})=>
+    `<li><div><div class="t">${esc(g.a)}</div><div class="s">${esc(DOVE[g.dove]||g.dove||"")} · ${ogniTesto(g.ogni)} · ultimo giro ${quandoGiro(g.q, true)}</div></div><span class="pill ${s.c}">${s.l}</span></li>`).join("")}</ul>` : '<div class="ph">Nessuna automazione.</div>'}</section>
+  </div>`;
+}
+function initAutomazioni(){
+  if(D.aut && D.aut.giri.length) salvaVisto(D.aut.giri.map(g=>g.q).sort().pop());
+  segnoAutomazioni();
+  $("#app").addEventListener("click", e=>{
+    const b = e.target.closest("[data-tipo]"); if(!b) return;
+    salvaTipo(b.dataset.tipo); monta(viewAutomazioni()); initAutomazioni();
+  });
+  return null;
+}
+
 function viewVuota(titolo, sotto, testo){
   return `<div class="view"><div><h1>${titolo}</h1><div class="sub">${sotto}</div></div>
   <section class="box">${inArrivo(testo)}</section></div>`;
@@ -1185,10 +1305,10 @@ const CASI = [
     [["a-tg","todo"],"Claude la smista: capisce il cliente e la mette nei to-do di lavoro."],
     [["a-oggi","oggi","a-passi","passi"],"Compare in Oggi e nei Prossimi passi del cliente."]]},
   {t:"Devo spostare o cancellare una voce", s:[
-    [["oggi"],"In Oggi tocchi la voce, poi Sposta o Elimina. Arriva con la tappa 2."],
+    [["oggi"],"In Oggi tocchi la voce, poi Sposta o Elimina. Arriva con la tappa 3."],
     [["a-oggi","todo"],"Il Cruscotto lo scrive nei to-do. Fine, nessuna sessione da aprire."]]},
   {t:"Dipende da qualcun altro", s:[
-    [["oggi"],"Tocchi Metti in attesa e scrivi chi o cosa la sblocca. Arriva con la tappa 2."],
+    [["oggi"],"Tocchi Metti in attesa e scrivi chi o cosa la sblocca. Arriva con la tappa 3."],
     [["attesa"],"Esce da Oggi, senza data. Resta visibile in In attesa, nel cliente."],
     [["passi"],"Quando arriva, tocchi Sbloccata: torna nei Prossimi passi."]]},
   {t:"La passo a Dario", s:[
@@ -1332,7 +1452,7 @@ function mostraChiave(motivo){
     try{ k = await apriConPassword(v); }
     catch(err){ if(err instanceof DOMException || err.name==="OperationError"){ mostraChiave("sbagliata"); return; } throw err; }
     salvaChiave(k, $("#in-ricorda").checked); CHIAVE = null;
-    D.indice = null; D.clienti = {}; D.risultati = {}; route();
+    D.indice = null; D.clienti = {}; D.risultati = {}; D.aut = undefined; route();
   });
   $("#in-chiave").focus();
 }
@@ -1349,6 +1469,7 @@ async function route(){
       if(!D.indice) throw new Error("indice.json mancante nell'archivio");
       OGGI = D.indice.oggi || OGGI;
       $("#data-oggi").textContent = dataLunga(OGGI);
+      if(key!=="automazioni") caricaAutomazioni();  // per il segno sulla voce Automazioni
       if(mio!==giro) return;
     }
     if(key.startsWith("c/")){
@@ -1361,8 +1482,9 @@ async function route(){
       if(!c){ location.hash = "#clienti"; return; }
       monta(viewCliente(c, tab)); redraw = initCliente(c, tab);
     } else if(key==="oggi"){ segnaTab("oggi"); monta(viewOggi()); redraw = initOggi(); }
-    else if(key==="posta"){ segnaTab("posta"); monta(viewVuota("Posta","Lavoro","Il report della posta arriva qui con la tappa 4. Per ora resta sulla Torre del Mac.","foglio/posta.json, scritto dal triage della posta.")); redraw = null; }
-    else if(key==="automazioni"){ segnaTab("automazioni"); monta(viewVuota("Automazioni","Cosa gira al posto tuo","Lo stato delle automazioni arriva qui con la tappa 4. Per ora resta sulla Torre del Mac.","registro-automazioni.jsonl. Ogni automazione scrive una riga a fine giro.")); redraw = null; }
+    else if(key==="posta"){ segnaTab("posta"); monta(viewVuota("Posta","Lavoro","Il report della posta arriva qui con la tappa 5. Per ora resta sulla Torre del Mac.")); redraw = null; }
+    else if(key==="automazioni"){ segnaTab("automazioni"); if(D.aut===undefined) await caricaAutomazioni(); if(mio!==giro) return;
+      AUT_NUOVI = new Set(giriNuovi().map(g=>g.a+"|"+g.q)); monta(viewAutomazioni()); redraw = initAutomazioni(); }
     else if(key==="come-funziona"){ segnaTab("come-funziona"); monta(viewCome()); redraw = initCome(); }
     else { segnaTab("clienti"); monta(viewClienti()); redraw = null; const d = await initClienti(); if(mio===giro) redraw = d; }
     window.scrollTo(0,0);
